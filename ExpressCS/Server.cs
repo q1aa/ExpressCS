@@ -140,6 +140,7 @@ namespace ExpressCS
             resp.ContentType = routeResponse.ContentType ?? "text/html";
             resp.ContentEncoding = routeResponse.ContentEncoding ?? Encoding.UTF8;
             resp.ContentLength64 = data.LongLength;
+            resp.StatusCode = routeResponse.StatusCode;
 
             await resp.OutputStream.WriteAsync(data, 0, data.Length);
 

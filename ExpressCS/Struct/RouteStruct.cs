@@ -38,6 +38,7 @@ namespace ExpressCS.Struct
             public Encoding ContentEncoding { get; set; }
             public long ContentLength64 { get; set; }
             public string Data { get; set; }
+            public int StatusCode { get; set; }
         }
     }
 }
