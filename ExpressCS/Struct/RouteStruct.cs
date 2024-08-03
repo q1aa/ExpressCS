@@ -29,7 +29,7 @@ namespace ExpressCS.Struct
 
             public string[]? DynamicParams { get; set; }
 
-            public string[]? QueryParams { get; set; }
+            public Dictionary<string, string>? QueryParams { get; set; }
         }
 
         public class Response

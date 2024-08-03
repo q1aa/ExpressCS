@@ -167,13 +167,16 @@ namespace ExpressCS
             return dynamicParams.ToArray();
         }
 
-        private static string[] getQueryParamsFromURL(string url)
+        private static Dictionary<string, string> getQueryParamsFromURL(string url)
         {
-            Console.WriteLine("url" + url);
             if (!url.Contains("?")) return null;
-
-            Console.WriteLine(url.Split('?')[1].Split('&'));
-            return url.Split('?')[1].Split('&');
+            Dictionary<string, string> queryParams = new Dictionary<string, string>();
+            foreach (string query in url.Split('?')[1].Split('&'))
+            {
+                string[] queryParts = query.Split('=');
+                queryParams.Add(queryParts[0], queryParts[1]);
+            }
+            return queryParams;
         }
     }
 }
