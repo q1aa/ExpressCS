@@ -52,18 +52,31 @@ namespace ExpressCS
                     }, routeResponse);
 
                     await sendResponse(resp, routeResponse);
+                    continue;
                 }
 
-                else
+
+                if (StorageUtil.CustomError != null)
                 {
-                    await sendResponse(resp, new RouteStruct.Response
+                    RouteStruct.Response routeResponse = new RouteStruct.Response();
+                    await StorageUtil.CustomError.Value.Callback(new RouteStruct.Request
                     {
-                        Data = "<html><body><h1>404 Not Found</h1></body></html>",
-                        ContentType = "text/html",
-                        ContentEncoding = Encoding.UTF8,
-                        ContentLength64 = Encoding.UTF8.GetByteCount("<html><body><h1>404 Not Found</h1></body></html>")
-                    });
+                        Url = req.Url.AbsolutePath,
+                        Method = req.HttpMethod,
+                        Host = req.UserHostName,
+                        UserAgent = req.UserAgent
+                    }, routeResponse);
+
+                    await sendResponse(resp, routeResponse);
+                    continue;
                 }
+                await sendResponse(resp, new RouteStruct.Response
+                {
+                    Data = "<html><body><h1>404 Not Found</h1></body></html>",
+                    ContentType = "text/html",
+                    ContentEncoding = Encoding.UTF8,
+                    ContentLength64 = Encoding.UTF8.GetByteCount("<html><body><h1>404 Not Found</h1></body></html>")
+                });
             }
         }
 

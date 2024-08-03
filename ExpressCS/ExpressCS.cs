@@ -47,6 +47,11 @@ namespace ExpressCS
 
         public Task<bool> CustomError(Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
         {
+            StorageUtil.CustomError = new Struct.RouteStruct
+            {
+                Callback = callback
+            };
+            Console.WriteLine("Custom error handler registered" + (StorageUtil.CustomError != null ? " successfully" : " unsuccessfully"));
             return Task.FromResult(true);
         }
     }
