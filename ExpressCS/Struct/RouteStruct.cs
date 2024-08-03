@@ -10,10 +10,9 @@ namespace ExpressCS.Struct
     {
         public string Path { get; set; }
         public HttpMethod[] Methods { get; set; }
-
         public Func<Request, Response, Task> Callback { get; set; }
 
-        public RouteStruct(string path, HttpMethod[] method, Func<Request, Response, Task> callback)
+        public RouteStruct(string path, HttpMethod[] method, Func<Request, Response, Task> callback, string[] dynamicContent)
         {
             Path = path;
             Methods = method;
@@ -27,6 +26,10 @@ namespace ExpressCS.Struct
             public string Host { get; set; }
             public string UserAgent { get; set; }
             public string Body { get; set; }
+
+            public string[]? DynamicParams { get; set; }
+
+            public string[]? QueryParams { get; set; }
         }
 
         public class Response

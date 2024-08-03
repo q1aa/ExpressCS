@@ -51,6 +51,39 @@ namespace ExpressCS
 
                 foreach (RouteStruct route in StorageUtil.Routes)
                 {
+                    if(route.Path.Contains(":"))
+                    {
+                        string[] routePath = route.Path.Split('/');
+                        string[] reqPath = req.Url.AbsolutePath.Split('/');
+
+                        if(routePath.Length != reqPath.Length)
+                        {
+                            continue;
+                        }
+
+                        bool match = true;
+                        for (int i = 0; i < routePath.Length; i++)
+                        {
+                            if (routePath[i].StartsWith(":"))
+                            {
+                                continue;
+                            }
+
+                            if (routePath[i] != reqPath[i])
+                            {
+                                match = false;
+                                break;
+                            }
+                        }
+
+                        if(match)
+                        {
+                            foundRoute = route;
+                            break;
+                        }
+                    }
+
+
                     Struct.HttpMethod requstMethode = HelperUtil.convertRequestMethode(req.HttpMethod);
                     if (route.Path == req.Url.AbsolutePath && (route.Methods.Contains(requstMethode) || route.Methods.Contains(Struct.HttpMethod.ANY)))
                     {
@@ -67,7 +100,9 @@ namespace ExpressCS
                         Method = req.HttpMethod,
                         Host = req.UserHostName,
                         UserAgent = req.UserAgent,
-                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null
+                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null,
+                        DynamicParams = getDynamicParamsFromURL(foundRoute.Value, req.Url.AbsolutePath),
+                        QueryParams = getQueryParamsFromURL(req.RawUrl)
                     }, routeResponse);
 
                     await sendResponse(resp, routeResponse);
@@ -83,7 +118,7 @@ namespace ExpressCS
                         Url = req.Url.AbsolutePath,
                         Method = req.HttpMethod,
                         Host = req.UserHostName,
-                        UserAgent = req.UserAgent
+                        UserAgent = req.UserAgent,
                     }, routeResponse);
 
                     await sendResponse(resp, routeResponse);
@@ -111,6 +146,34 @@ namespace ExpressCS
             resp.Close();
 
             return true;
+        }
+
+        private static string[] getDynamicParamsFromURL(RouteStruct route, string url)
+        {
+            string[] routePath = route.Path.Split('/');
+            string[] reqPath = url.Split('/');
+
+            List<string> dynamicParams = new List<string>();
+
+            for (int i = 0; i < routePath.Length; i++)
+            {
+                if (routePath[i].StartsWith(":"))
+                {
+                    dynamicParams.Add(reqPath[i]);
+                }
+            }
+
+            if(dynamicParams.Count == 0) return null;
+            return dynamicParams.ToArray();
+        }
+
+        private static string[] getQueryParamsFromURL(string url)
+        {
+            Console.WriteLine("url" + url);
+            if (!url.Contains("?")) return null;
+
+            Console.WriteLine(url.Split('?')[1].Split('&'));
+            return url.Split('?')[1].Split('&');
         }
     }
 }
