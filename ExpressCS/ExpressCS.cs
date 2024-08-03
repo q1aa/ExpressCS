@@ -26,19 +26,23 @@ namespace ExpressCS
             return Task.FromResult(true);
         }
 
-        public Task<bool> RegisterRoute(string path, HttpMethod method, Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
+        public Task<bool> RegisterRoute(string path, Struct.HttpMethod[] method, Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
         {
             StorageUtil.Routes.Add(new RouteStruct
             {
                 Path = path,
-                Method = method,
+                Methods = method,
                 Callback = callback
             });
 
             Console.WriteLine($"Registered route: {path}");
 
-
             return Task.FromResult(true);
+        }
+
+        public Task<bool> RegisterRoute(string path, Struct.HttpMethod method, Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
+        {
+            return RegisterRoute(path, new Struct.HttpMethod[] { method }, callback);
         }
 
         public Task<bool> CustomError(Func<RouteStruct.Request, RouteStruct.Response, Task> callback)

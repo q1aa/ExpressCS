@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using ExpressCS.Utils;
 
 namespace ExpressCS
 {
@@ -22,11 +23,18 @@ namespace ExpressCS
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
 
+                if (req.HttpMethod == "HEAD")
+                {
+                    resp.Close();
+                    continue;
+                }
+
                 RouteStruct? foundRoute = null;
 
                 foreach (RouteStruct route in StorageUtil.Routes)
                 {
-                    if (route.Path == req.Url.AbsolutePath && route.Method.ToString() == req.HttpMethod)
+                    Struct.HttpMethod requstMethode = HelperUtil.convertRequestMethode(req.HttpMethod);
+                    if (route.Path == req.Url.AbsolutePath && (route.Methods.Contains(requstMethode) || route.Methods.Contains(Struct.HttpMethod.ANY)))
                     {
                         foundRoute = route;
                     }
@@ -66,7 +74,10 @@ namespace ExpressCS
             resp.ContentEncoding = routeResponse.ContentEncoding ?? Encoding.UTF8;
             resp.ContentLength64 = data.LongLength;
 
+            Console.WriteLine($"Sending response: {routeResponse.Data}");
+
             await resp.OutputStream.WriteAsync(data, 0, data.Length);
+
             resp.Close();
 
             return true;

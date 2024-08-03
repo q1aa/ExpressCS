@@ -9,14 +9,14 @@ namespace ExpressCS.Struct
     public struct RouteStruct
     {
         public string Path { get; set; }
-        public HttpMethod Method { get; set; }
+        public HttpMethod[] Methods { get; set; }
 
         public Func<Request, Response, Task> Callback { get; set; }
 
-        public RouteStruct(string path, HttpMethod method, Func<Request, Response, Task> callback)
+        public RouteStruct(string path, HttpMethod[] method, Func<Request, Response, Task> callback)
         {
             Path = path;
-            Method = method;
+            Methods = method;
             Callback = callback;
         }
 
