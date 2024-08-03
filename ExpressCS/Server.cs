@@ -66,7 +66,8 @@ namespace ExpressCS
                         Url = req.Url.AbsolutePath,
                         Method = req.HttpMethod,
                         Host = req.UserHostName,
-                        UserAgent = req.UserAgent
+                        UserAgent = req.UserAgent,
+                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null
                     }, routeResponse);
 
                     await sendResponse(resp, routeResponse);

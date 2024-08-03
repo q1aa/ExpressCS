@@ -26,6 +26,7 @@ namespace ExpressCS.Struct
             public string Method { get; set; }
             public string Host { get; set; }
             public string UserAgent { get; set; }
+            public string Body { get; set; }
         }
 
         public class Response
