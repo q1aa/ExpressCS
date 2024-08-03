@@ -16,5 +16,7 @@ namespace ExpressCS.Utils
         public static List<RouteStruct> Routes { get; set; } = new List<RouteStruct>();
 
         public static RouteStruct? CustomError { get; set; } = null;
+
+        public static RouteStruct? Middleware { get; set; } = null;
     }
 }

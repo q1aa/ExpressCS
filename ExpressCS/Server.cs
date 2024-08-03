@@ -29,6 +29,24 @@ namespace ExpressCS
                     continue;
                 }
 
+                if(StorageUtil.Middleware != null)
+                {
+                    RouteStruct.Response routeResponse = new RouteStruct.Response();
+                    await StorageUtil.Middleware.Value.Callback(new RouteStruct.Request
+                    {
+                        Url = req.Url.AbsolutePath,
+                        Method = req.HttpMethod,
+                        Host = req.UserHostName,
+                        UserAgent = req.UserAgent
+                    }, routeResponse);
+
+                    if(routeResponse.Data != null)
+                    {
+                        await sendResponse(resp, routeResponse);
+                        continue;
+                    }
+                }
+
                 RouteStruct? foundRoute = null;
 
                 foreach (RouteStruct route in StorageUtil.Routes)
@@ -86,8 +104,6 @@ namespace ExpressCS
             resp.ContentType = routeResponse.ContentType ?? "text/html";
             resp.ContentEncoding = routeResponse.ContentEncoding ?? Encoding.UTF8;
             resp.ContentLength64 = data.LongLength;
-
-            Console.WriteLine($"Sending response: {routeResponse.Data}");
 
             await resp.OutputStream.WriteAsync(data, 0, data.Length);
 

@@ -54,5 +54,15 @@ namespace ExpressCS
             Console.WriteLine("Custom error handler registered" + (StorageUtil.CustomError != null ? " successfully" : " unsuccessfully"));
             return Task.FromResult(true);
         }
+
+        public Task<bool> MiddleWare(Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
+        {
+            StorageUtil.Middleware = new Struct.RouteStruct
+            {
+                Callback = callback
+            };
+            Console.WriteLine("Middleware registered" + (StorageUtil.Middleware != null ? " successfully" : " unsuccessfully"));
+            return Task.FromResult(true);
+        }
     }
 }
