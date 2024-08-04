@@ -1,4 +1,5 @@
 ﻿using ExpressCS.Struct;
+using ExpressCS.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +13,18 @@ namespace ExpressCS
     {
         public static async Task<bool> handleResponse(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
+            if (resp == null) return false;
+            
             switch (routeResponse.ResponseType)
             {
                 case ResponseType.DATA:
                     return await sendResponse(resp, routeResponse);
                 case ResponseType.DOWNLOAD:
-                    return await downloadFile(resp, routeResponse.Data, routeResponse.FileName);
+                    return await downloadFile(resp, routeResponse);
                 case ResponseType.SENDFILE:
-                    return await sendFile(resp, routeResponse.Data);
+                    return await sendFile(resp, routeResponse);
                 case ResponseType.REDIRECT:
-                    return await redirect(resp, routeResponse.Data);
+                    return await redirect(resp, routeResponse);
                 default:
                     return false;
             }
@@ -32,58 +35,51 @@ namespace ExpressCS
             resp.ContentType = routeResponse.ContentType ?? "text/html";
             resp.ContentEncoding = routeResponse.ContentEncoding ?? Encoding.UTF8;
             resp.ContentLength64 = data.LongLength;
-            resp.StatusCode = routeResponse.StatusCode;
+            resp.StatusCode = HelperUtil.getStatusCode(routeResponse.StatusCode, 200);
 
             await resp.OutputStream.WriteAsync(data, 0, data.Length);
-
             resp.Close();
-
             return true;
         }
 
-        public static async Task<bool> downloadFile(HttpListenerResponse resp, string filePath, string fileName = null)
+        public static async Task<bool> downloadFile(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
-            byte[] data = File.ReadAllBytes(filePath);
+            byte[] data = File.ReadAllBytes(routeResponse.FileName);
             resp.ContentType = "application/octet-stream";
             resp.ContentLength64 = data.LongLength;
-            resp.StatusCode = 200;
+            resp.StatusCode = HelperUtil.getStatusCode(routeResponse.StatusCode, 200);
 
-            if (fileName != null)
+            if (routeResponse.FileName != null)
             {
-                resp.AddHeader("Content-Disposition", $"attachment; filename={fileName}");
+                resp.AddHeader("Content-Disposition", $"attachment; filename={routeResponse.FileName}");
             }
             else
             {
-                resp.AddHeader("Content-Disposition", $"attachment; filename={Path.GetFileName(filePath)}");
+                resp.AddHeader("Content-Disposition", $"attachment; filename={Path.GetFileName(routeResponse.Data)}");
             }
 
             await resp.OutputStream.WriteAsync(data, 0, data.Length);
-
             resp.Close();
-
             return true;
         }
 
-        public static async Task<bool> sendFile(HttpListenerResponse resp, string filePath)
+        public static async Task<bool> sendFile(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
-            byte[] data = File.ReadAllBytes(filePath);
+            byte[] data = File.ReadAllBytes(routeResponse.Data);
             resp.ContentType = "text/html";
             resp.ContentLength64 = data.LongLength;
-            resp.StatusCode = 200;
+            resp.StatusCode = HelperUtil.getStatusCode(routeResponse.StatusCode, 200);
 
             await resp.OutputStream.WriteAsync(data, 0, data.Length);
-
             resp.Close();
-
             return true;
         }
 
-        public static async Task<bool> redirect(HttpListenerResponse resp, string path)
+        public static async Task<bool> redirect(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
-            resp.StatusCode = 302;
-            resp.RedirectLocation = path;
+            resp.RedirectLocation = routeResponse.Data;
+            resp.StatusCode = HelperUtil.getStatusCode(routeResponse.StatusCode, 302);
             resp.Close();
-
             return true;
         }
     }

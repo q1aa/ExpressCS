@@ -55,5 +55,10 @@ namespace ExpressCS.Utils
             }
             return queryParams;
         }
+
+        public static int getStatusCode(int setStatusCode, int preferredStatusCode)
+        {
+            return setStatusCode == -1 ? preferredStatusCode : setStatusCode;
+        }
     }
 }
