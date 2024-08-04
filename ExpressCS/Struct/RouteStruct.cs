@@ -37,8 +37,37 @@ namespace ExpressCS.Struct
             public string ContentType { get; set; }
             public Encoding ContentEncoding { get; set; }
             public long ContentLength64 { get; set; }
-            public string Data { get; set; }
+            public string Data { get; set; } = null;
             public int StatusCode { get; set; } = 200;
+            public ResponseType ResponseType { get; set; }
+
+            //only for the download function, to set a custom filename
+            public string FileName { get; set; }
+
+            public void Send(string data)
+            {
+                Data = data;
+                ResponseType = ResponseType.DATA;
+            }
+
+            public void Download(string filePath, string fileName = null)
+            {
+                Data = filePath;
+                ResponseType = ResponseType.DOWNLOAD;
+                FileName = fileName;
+            }
+
+            public void SendFile(string filePath)
+            {
+                Data = filePath;
+                ResponseType = ResponseType.SENDFILE;
+            }
+
+            public void Redirect(string path)
+            {
+                Data = path;
+                ResponseType = ResponseType.REDIRECT;
+            }
         }
     }
 }
