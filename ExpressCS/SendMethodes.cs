@@ -65,12 +65,19 @@ namespace ExpressCS
 
         public static async Task<bool> sendFile(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
-            byte[] data = File.ReadAllBytes(routeResponse.Data);
-            resp.ContentType = "text/html";
-            resp.ContentLength64 = data.LongLength;
-            resp.StatusCode = HelperUtil.getStatusCode(routeResponse.StatusCode, 200);
+            using (FileStream fs = new FileStream(routeResponse.Data, FileMode.Open, FileAccess.Read))
+            {
+                resp.ContentType = HelperUtil.getContentType(Path.GetExtension(routeResponse.Data));
+                resp.ContentLength64 = fs.Length;
+                resp.StatusCode = HelperUtil.getStatusCode(routeResponse.StatusCode, 200);
 
-            await resp.OutputStream.WriteAsync(data, 0, data.Length);
+                byte[] buffer = new byte[64 * 1024];
+                int read;
+                while ((read = fs.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    await resp.OutputStream.WriteAsync(buffer, 0, read);
+                }
+            }
             resp.Close();
             return true;
         }
