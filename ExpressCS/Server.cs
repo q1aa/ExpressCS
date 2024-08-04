@@ -109,6 +109,22 @@ namespace ExpressCS
                     continue;
                 }
 
+                bool staticFileFound = false;
+                foreach (StaticFileStruct staticFile in StorageUtil.StaticFiles)
+                {
+                    if (req.Url.AbsolutePath.StartsWith(staticFile.WebPath))
+                    {
+                        string filePath = req.Url.AbsolutePath.Replace(staticFile.WebPath, "");
+                        if (!File.Exists(staticFile.DirectoryPath.FullName + "/" + filePath))
+                        {
+                            continue;
+                        }
+
+                        staticFileFound = true;
+                    }
+                }
+                if (staticFileFound) continue;
+
 
                 if (StorageUtil.CustomError != null)
                 {

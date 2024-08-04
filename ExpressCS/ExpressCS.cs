@@ -64,5 +64,12 @@ namespace ExpressCS
             Console.WriteLine("Middleware registered" + (StorageUtil.Middleware != null ? " successfully" : " unsuccessfully"));
             return Task.FromResult(true);
         }
+
+        public Task<bool> StaticDirectory(string webPath, DirectoryInfo directory)
+        {
+            StorageUtil.StaticFiles.Add(new StaticFileStruct(webPath, directory));
+            Console.WriteLine($"Registered static files: {webPath} -> {directory.FullName}");
+            return Task.FromResult(true);
+        }
     }
 }

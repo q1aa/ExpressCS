@@ -14,9 +14,8 @@ namespace ExpressCS.Utils
         //public static ConfigStruct? ServerConfig { get; set; } = null;
         public static HttpListener Listener { get; set; } = new HttpListener();
         public static List<RouteStruct> Routes { get; set; } = new List<RouteStruct>();
-
         public static RouteStruct? CustomError { get; set; } = null;
-
         public static RouteStruct? Middleware { get; set; } = null;
+        public static List<StaticFileStruct> StaticFiles { get; set; } = new List<StaticFileStruct>();
     }
 }
