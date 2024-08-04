@@ -121,6 +121,7 @@ namespace ExpressCS
                         }
 
                         staticFileFound = true;
+                        await sendFile(resp, staticFile.DirectoryPath.FullName + "/" + filePath);
                     }
                 }
                 if (staticFileFound) continue;
@@ -157,6 +158,34 @@ namespace ExpressCS
             resp.ContentEncoding = routeResponse.ContentEncoding ?? Encoding.UTF8;
             resp.ContentLength64 = data.LongLength;
             resp.StatusCode = routeResponse.StatusCode;
+
+            await resp.OutputStream.WriteAsync(data, 0, data.Length);
+
+            resp.Close();
+
+            return true;
+        }
+
+        private static async Task<bool> downloadFile(HttpListenerResponse resp, string filePath)
+        {
+            byte[] data = File.ReadAllBytes(filePath);
+            resp.ContentType = "application/octet-stream";
+            resp.ContentLength64 = data.LongLength;
+            resp.StatusCode = 200;
+
+            await resp.OutputStream.WriteAsync(data, 0, data.Length);
+
+            resp.Close();
+
+            return true;
+        }
+
+        private static async Task<bool> sendFile(HttpListenerResponse resp, string filePath)
+        {
+            byte[] data = File.ReadAllBytes(filePath);
+            resp.ContentType = "text/html";
+            resp.ContentLength64 = data.LongLength;
+            resp.StatusCode = 200;
 
             await resp.OutputStream.WriteAsync(data, 0, data.Length);
 
