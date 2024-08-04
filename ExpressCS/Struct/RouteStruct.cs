@@ -39,6 +39,7 @@ namespace ExpressCS.Struct
             public long ContentLength64 { get; set; }
             public string Data { get; set; } = null;
             public int StatusCode { get; set; } = -1;
+            public List<string> Headers { get; set; }
             public ResponseType ResponseType { get; set; }
 
             //only for the download function, to set a custom filename

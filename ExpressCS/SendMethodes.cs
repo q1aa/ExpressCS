@@ -14,7 +14,13 @@ namespace ExpressCS
         public static async Task<bool> handleResponse(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
             if (resp == null) return false;
-            
+
+            routeResponse.Headers?.ForEach(header =>
+            {
+                resp.AddHeader(header.Split(':')[0], header.Split(':')[1]);
+            });
+
+
             switch (routeResponse.ResponseType)
             {
                 case ResponseType.DATA:
