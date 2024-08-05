@@ -14,12 +14,25 @@ namespace ExpressCS
 
         public Task<bool> StartUp(ConfigStruct config)
         {
+            StartUp(config, () => Task.CompletedTask);
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> StartUp(ConfigStruct config, Func<Task> callback)
+        {
             StorageUtil.Listener = new HttpListener();
             StorageUtil.Listener.Prefixes.Add($"{(config.Ssl ? "https" : "http")}://{config.Host}:{config.Port}/");
             StorageUtil.Listener.Start();
-            Console.WriteLine($"Server started on {config.Host}:{config.Port}");
+
+            Console.WriteLine("---------------------------------");
+            foreach (var routes in StorageUtil.Routes)
+            {
+                LogUtil.LogRouteRegister(routes.Path, routes.Methods);
+            }
+            Console.WriteLine("---------------------------------");
 
             Task listenTask = Server.HandleIncomeRequests();
+            callback.Invoke();
             listenTask.GetAwaiter().GetResult();
             StorageUtil.Listener.Close();
 
@@ -35,8 +48,6 @@ namespace ExpressCS
                 Callback = callback
             });
 
-            Console.WriteLine($"Registered route: {path}");
-
             return Task.FromResult(true);
         }
 
@@ -51,7 +62,7 @@ namespace ExpressCS
             {
                 Callback = callback
             };
-            Console.WriteLine("Custom error handler registered" + (StorageUtil.CustomError != null ? " successfully" : " unsuccessfully"));
+            LogUtil.Log("Custom error handler registered" + (StorageUtil.CustomError != null ? " successfully" : " unsuccessfully"));
             return Task.FromResult(true);
         }
 
@@ -61,14 +72,14 @@ namespace ExpressCS
             {
                 Callback = callback
             };
-            Console.WriteLine("Middleware registered" + (StorageUtil.Middleware != null ? " successfully" : " unsuccessfully"));
+            LogUtil.Log("Middleware registered" + (StorageUtil.Middleware != null ? " successfully" : " unsuccessfully"));
             return Task.FromResult(true);
         }
 
         public Task<bool> StaticDirectory(string webPath, DirectoryInfo directory)
         {
             StorageUtil.StaticFiles.Add(new StaticFileStruct(webPath, directory));
-            Console.WriteLine($"Registered static files: {webPath} -> {directory.FullName}");
+            LogUtil.Log($"Registered static files: {webPath} -> {directory.FullName}");
             return Task.FromResult(true);
         }
     }

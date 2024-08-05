@@ -111,5 +111,21 @@ namespace ExpressCS.Utils
                     return "application/octet-stream";
             }
         }
+
+        public static ConsoleColor getHttpMethodeColor(Struct.HttpMethod httpMethod)
+        {
+            return httpMethod switch
+            {
+                Struct.HttpMethod.GET => ConsoleColor.Green,
+                Struct.HttpMethod.POST => ConsoleColor.Blue,
+                Struct.HttpMethod.PUT => ConsoleColor.Yellow,
+                Struct.HttpMethod.DELETE => ConsoleColor.Red,
+                Struct.HttpMethod.PATCH => ConsoleColor.Magenta,
+                Struct.HttpMethod.OPTIONS => ConsoleColor.Cyan,
+                Struct.HttpMethod.HEAD => ConsoleColor.DarkYellow,
+                Struct.HttpMethod.ANY => ConsoleColor.DarkMagenta,
+                _ => ConsoleColor.White
+            };
+        }
     }
 }
