@@ -22,7 +22,7 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
 
 1. Download the DLL from the repository:
     ```sh
-    curl -L -o ExpressCS.dll https://github.com/q1aa/ExpressCS/releases/latest/download/ExpressCS.dll
+    curl -L -o ExpressCS.dll https://github.com/q1aa/ExpressCS/releases/tag/Default
     ```
 
 2. Create a new C# project:
