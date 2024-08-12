@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,7 +27,8 @@ namespace ExpressCS.Struct
             public string Host { get; set; }
             public string UserAgent { get; set; }
             public string Body { get; set; }
-
+            public NameValueCollection Headers { get; set; }
+            public string ContentType { get; set; }
             public string[]? DynamicParams { get; set; }
 
             public Dictionary<string, string>? QueryParams { get; set; }

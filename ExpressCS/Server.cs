@@ -38,7 +38,11 @@ namespace ExpressCS
                         Url = req.Url.AbsolutePath,
                         Method = req.HttpMethod,
                         Host = req.UserHostName,
-                        UserAgent = req.UserAgent
+                        UserAgent = req.UserAgent,
+                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null,
+                        QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
+                        ContentType = req.ContentType,
+                        Headers = req.Headers
                     }, routeResponse);
 
                     if(routeResponse.Data != null)
@@ -103,7 +107,9 @@ namespace ExpressCS
                         UserAgent = req.UserAgent,
                         Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null,
                         DynamicParams = HelperUtil.getDynamicParamsFromURL(foundRoute.Value, req.Url.AbsolutePath),
-                        QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl)
+                        QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
+                        ContentType = req.ContentType,
+                        Headers = req.Headers
                     }, routeResponse);
 
                     await SendMethodes.handleResponse(resp, routeResponse);
@@ -141,6 +147,10 @@ namespace ExpressCS
                         Method = req.HttpMethod,
                         Host = req.UserHostName,
                         UserAgent = req.UserAgent,
+                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null,
+                        QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
+                        ContentType = req.ContentType,
+                        Headers = req.Headers
                     }, routeResponse);
 
                     await SendMethodes.handleResponse(resp, routeResponse);

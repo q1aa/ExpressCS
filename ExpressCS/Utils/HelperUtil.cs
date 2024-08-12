@@ -47,6 +47,7 @@ namespace ExpressCS.Utils
         public static Dictionary<string, string> getQueryParamsFromURL(string url)
         {
             if (!url.Contains("?")) return null;
+            
             Dictionary<string, string> queryParams = new Dictionary<string, string>();
             foreach (string query in url.Split('?')[1].Split('&'))
             {
