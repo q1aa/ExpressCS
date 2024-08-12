@@ -1,7 +1,7 @@
-﻿using ExpressCS.Struct;
+﻿using System.Net;
+using ExpressCS.Struct;
 using ExpressCS.Types;
 using ExpressCS.Utils;
-using System.Net;
 
 namespace ExpressCS
 {
@@ -54,6 +54,11 @@ namespace ExpressCS
         public Task<bool> RegisterRoute(string path, Struct.HttpMethod method, Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
         {
             return RegisterRoute(path, new Struct.HttpMethod[] { method }, callback);
+        }
+
+        public Task<bool> RegisterRoute(string path, Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
+        {
+            return RegisterRoute(path, new Struct.HttpMethod[] { Struct.HttpMethod.ANY }, callback);
         }
 
         public Task<bool> CustomError(Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
