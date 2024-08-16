@@ -111,6 +111,17 @@ server.RegisterRoute("/test", HttpMethod.ANY, async (req, res) => {
 
 Here are some examples of the routing you might want to use:
 
+### JSON Body
+Handling JSON body, you may add a null check here too!
+```csharp
+server.RegisterRoute("/json", HttpMethod.POST, async (req, res) =>
+{
+    string? name = req.JSONBody["name"];
+    string? age = req.JSONBody["age"];
+    res.Send($"Welcome {name} with the age of {age}");
+});
+```
+
 ### Query Route
 
 Handles query parameters and sends a response:
