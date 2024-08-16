@@ -19,8 +19,6 @@ namespace ExpressCS
             while (true)
             {
                 HttpListenerContext ctx = await StorageUtil.Listener.GetContextAsync();
-
-                // Peel out the requests and response objects
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
 
@@ -30,22 +28,26 @@ namespace ExpressCS
                     continue;
                 }
 
-                if(StorageUtil.Middleware != null)
+                string rawBody = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null;
+                RouteStruct.Request parsedRequest = new RouteStruct.Request()
+                {
+                    Url = req.Url.AbsolutePath,
+                    Method = req.HttpMethod,
+                    Host = req.UserHostName,
+                    UserAgent = req.UserAgent,
+                    Body = rawBody,
+                    JSONBody = HelperUtil.parseJSONBody(rawBody),
+                    QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
+                    ContentType = req.ContentType,
+                    Headers = req.Headers
+                };
+
+                if (StorageUtil.Middleware != null)
                 {
                     RouteStruct.Response routeResponse = new RouteStruct.Response();
-                    await StorageUtil.Middleware.Value.Callback(new RouteStruct.Request
-                    {
-                        Url = req.Url.AbsolutePath,
-                        Method = req.HttpMethod,
-                        Host = req.UserHostName,
-                        UserAgent = req.UserAgent,
-                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null,
-                        QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
-                        ContentType = req.ContentType,
-                        Headers = req.Headers
-                    }, routeResponse);
+                    await StorageUtil.Middleware.Value.Callback(parsedRequest, routeResponse);
 
-                    if(routeResponse.Data != null)
+                    if (routeResponse.Data != null)
                     {
                         await SendMethodes.handleResponse(resp, routeResponse);
                         continue;
@@ -53,7 +55,6 @@ namespace ExpressCS
                 }
 
                 RouteStruct? foundRoute = null;
-
                 foreach (RouteStruct route in StorageUtil.Routes)
                 {
                     if(route.Path.Contains(":"))
@@ -96,22 +97,10 @@ namespace ExpressCS
                     }
                 }
 
-                if(foundRoute != null)
+                if (foundRoute != null)
                 {
                     RouteStruct.Response routeResponse = new RouteStruct.Response();
-                    await foundRoute.Value.Callback(new RouteStruct.Request
-                    {
-                        Url = req.Url.AbsolutePath,
-                        Method = req.HttpMethod,
-                        Host = req.UserHostName,
-                        UserAgent = req.UserAgent,
-                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null,
-                        DynamicParams = HelperUtil.getDynamicParamsFromURL(foundRoute.Value, req.Url.AbsolutePath),
-                        QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
-                        ContentType = req.ContentType,
-                        Headers = req.Headers
-                    }, routeResponse);
-
+                    await foundRoute.Value.Callback(parsedRequest, routeResponse);
                     await SendMethodes.handleResponse(resp, routeResponse);
                     continue;
                 }
@@ -141,17 +130,7 @@ namespace ExpressCS
                 if (StorageUtil.CustomError != null)
                 {
                     RouteStruct.Response routeResponse = new RouteStruct.Response();
-                    await StorageUtil.CustomError.Value.Callback(new RouteStruct.Request
-                    {
-                        Url = req.Url.AbsolutePath,
-                        Method = req.HttpMethod,
-                        Host = req.UserHostName,
-                        UserAgent = req.UserAgent,
-                        Body = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null,
-                        QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
-                        ContentType = req.ContentType,
-                        Headers = req.Headers
-                    }, routeResponse);
+                    await StorageUtil.CustomError.Value.Callback(parsedRequest, routeResponse);
 
                     await SendMethodes.handleResponse(resp, routeResponse);
                     continue;

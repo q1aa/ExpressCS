@@ -1,8 +1,10 @@
 ﻿using ExpressCS.Struct;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace ExpressCS.Utils
@@ -127,6 +129,29 @@ namespace ExpressCS.Utils
                 Struct.HttpMethod.ANY => ConsoleColor.DarkMagenta,
                 _ => ConsoleColor.White
             };
+        }
+
+        public static NameValueCollection parseJSONBody(string body)
+        {
+            if(body == null) return new NameValueCollection();
+
+            NameValueCollection jsonBody = new NameValueCollection();
+            while(body != null)
+            {
+                JsonNode jsonNode = JsonNode.Parse(body);
+                if (jsonNode == null) break;
+
+                if (jsonNode is JsonObject jsonObject)
+                {
+                    foreach (KeyValuePair<string, JsonNode> jsonPair in jsonObject)
+                    {
+                        jsonBody.Add(jsonPair.Key, jsonPair.Value.ToString());
+                    }
+                }
+                break;  
+            }
+
+            return jsonBody;
         }
     }
 }

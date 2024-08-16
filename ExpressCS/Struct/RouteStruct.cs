@@ -27,10 +27,10 @@ namespace ExpressCS.Struct
             public string Host { get; set; }
             public string UserAgent { get; set; }
             public string Body { get; set; }
+            public NameValueCollection JSONBody { get; set; }
             public NameValueCollection Headers { get; set; }
             public string ContentType { get; set; }
             public string[]? DynamicParams { get; set; }
-
             public Dictionary<string, string>? QueryParams { get; set; }
         }
 
