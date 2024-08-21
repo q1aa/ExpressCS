@@ -50,8 +50,9 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
     using ExpressCS;
     ```
 
-    6.1 For a simple "Hello World" example, refer to [this link](#hello-world-example).
+    6.1 For a simple "Hello World" example, check out [this link](#hello-world-example).
 
+    6.2 For a Example how to use the Razor engine with it, [this link](#using-razor).
 7. Build and run the project:
     ```sh
     dotnet run
@@ -194,14 +195,6 @@ server.MiddleWare(async (req, res) =>
 });
 ```
 
-## Contributing 🤝
-
-Contributions are welcome! Please fork the repository and submit a pull request.
-
-## License 📄
-
-This project is licensed under the MIT License.
-
 # Hello World Example
 <p name="hello-world-example"></p>
 
@@ -227,6 +220,66 @@ public static class Program
 }
 ```
 
----
+# Using Razor
+<p name="using-razor"></p>
+Here you can see a example how to use Razor
 
+```csharp
+server.RegisterRoute("/cshtml", HttpMethod.GET, async (req, res) =>
+{
+    var engine = new RazorLightEngineBuilder()
+   .UseEmbeddedResourcesProject(typeof(Program))
+   .SetOperatingAssembly(typeof(Program).Assembly)
+   .UseMemoryCachingProvider()
+   .Build();
+
+    //Those are the replacing values 
+    var replaceValues = new
+    {
+        Name = "World",
+        Title = "Hello",
+        ID = new Random().Next(int.MaxValue - 5389, int.MaxValue)
+    };
+
+    //you you read the content out of a file
+    string fileContent = await File.ReadAllTextAsync(Directory.GetCurrentDirectory() + "/Views/test.cshtml");
+
+    //Or just create it inline
+    string inlineContent = "<html><body><h1>Hello @Model.Name, @Model.Title, @Model.ID</h1></body></html>"
+
+    //Here the page will getting rendered
+    string result = await engine.CompileRenderStringAsync("templateKey", fileContent, replaceValues);
+    //Which we just send over to the client afterwards
+    res.Send(result);
+});
+```
+
+by the way, the test.cshtml file looks like this
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+</head>
+<body>
+    <h1>Hello, @Model.Name!</h1>
+    <p>Welcome to @Model.Title.</p>
+    <p>
+        provided id is @Model.ID
+    </p>
+</body>
+</html>
+
+```
+## Contributing 🤝
+
+Contributions are welcome! Please fork the repository and submit a pull request.
+
+## License 📄
+
+This project is licensed under the MIT License.
+---
 Made with ❤️ by [Julin](https://github.com/q1aa)
