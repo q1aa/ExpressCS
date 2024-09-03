@@ -8,6 +8,10 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ExpressCS.Utils;
+using Microsoft.AspNetCore.Server.HttpSys;
+using static ExpressCS.Struct.WebSocketRouteStruct;
+using System.Net.WebSockets;
+using System.Collections.Specialized;
 
 
 namespace ExpressCS
@@ -21,6 +25,46 @@ namespace ExpressCS
                 HttpListenerContext ctx = await StorageUtil.Listener.GetContextAsync();
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
+
+                if(req.IsWebSocketRequest)
+                {
+                    foreach (WebSocketRouteStruct route in StorageUtil.WebSocketRoutes)
+                    {
+                        if (req.Url.AbsolutePath == route.Path)
+                        {
+                            HttpListenerWebSocketContext webSocketContext = await ctx.AcceptWebSocketAsync(null);
+                            WebSocket webSocket = webSocketContext.WebSocket;
+
+                            if (route.ConnectionEstablished != null)
+                            {
+                                WebSocketRequest request = new WebSocketRequest
+                                {
+                                    Url = webSocket.ToString(),
+                                    Host = webSocket.ToString(),
+                                    Headers = new NameValueCollection(),
+                                    Data = null
+                                };
+
+                                WebSocketResponse response = new WebSocketResponse
+                                {
+                                    Headers = new List<string>(),
+                                };
+
+                                await route.ConnectionEstablished(request, response);
+
+                                if (response.Data != null)
+                                {
+                                    byte[] responseBytes = Encoding.UTF8.GetBytes(response.Data);
+                                    await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                                }
+                            }
+
+                            await HandleWebSocketConnection(webSocket, route.Callback);
+                        }
+                    }
+
+                    continue;
+                }
 
                 if (req.HttpMethod == "HEAD")
                 {
@@ -142,6 +186,37 @@ namespace ExpressCS
                     ContentEncoding = Encoding.UTF8,
                     ContentLength64 = Encoding.UTF8.GetByteCount("<html><body><h1>404 Not Found</h1></body></html>")
                 });
+            }
+        }
+
+        private static async Task HandleWebSocketConnection(WebSocket webSocket, Func<WebSocketRequest, WebSocketResponse, Task> callback)
+        {
+            byte[] buffer = new byte[1024 * 4];
+            while (webSocket.State == WebSocketState.Open)
+            {
+                WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+
+                WebSocketRequest request = new WebSocketRequest
+                {
+                    Url = webSocket.ToString(),
+                    Host = webSocket.ToString(),
+                    Headers = new NameValueCollection(),
+                    Data = message
+                };
+
+                WebSocketResponse response = new WebSocketResponse
+                {
+                    Headers = new List<string>()
+                };
+
+                await callback(request, response);
+
+                if (response.Data != null)
+                {
+                    byte[] responseBytes = Encoding.UTF8.GetBytes(response.Data);
+                    await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                }
             }
         }
     }

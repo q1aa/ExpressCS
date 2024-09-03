@@ -37,10 +37,11 @@ namespace ExpressCS.Utils
             Log(message, ConsoleColor.Cyan);
         }
 
-        public static void LogRouteRegister(string path, Struct.HttpMethod[] method)
+        public static void LogRouteRegister(string path, Struct.HttpMethod[] method, bool webSocketRoute = false)
         {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write($"[ExpressCS] Route registered: ");
+            if(!webSocketRoute) Console.Write($"[ExpressCS] Route registered: ");
+            else Console.Write($"[ExpressCS] WebSocket route registered: ");
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.Write($"{path} ");
 

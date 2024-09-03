@@ -30,6 +30,11 @@ namespace ExpressCS
                 LogUtil.LogRouteRegister(routes.Path, routes.Methods);
             }
             Console.WriteLine("---------------------------------");
+            foreach (var route in StorageUtil.WebSocketRoutes)
+            {
+                LogUtil.LogRouteRegister(route.Path, new Struct.HttpMethod[] { }, true);
+            }
+            Console.WriteLine("---------------------------------");
 
             Task listenTask = Server.HandleIncomeRequests();
             callback.Invoke();
@@ -85,6 +90,18 @@ namespace ExpressCS
         {
             StorageUtil.StaticFiles.Add(new StaticFileStruct(webPath, directory));
             LogUtil.Log($"Registered static files: {webPath} -> {directory.FullName}");
+            return Task.FromResult(true);
+        }
+
+        public Task<bool> RegisterWebSocket(string path, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> callback, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> connectionEstablished)
+        {
+            StorageUtil.WebSocketRoutes.Add(new WebSocketRouteStruct
+            {
+                Path = path,
+                Callback = callback,
+                ConnectionEstablished = connectionEstablished
+            });
+
             return Task.FromResult(true);
         }
     }
