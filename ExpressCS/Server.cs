@@ -59,7 +59,7 @@ namespace ExpressCS
                                 }
                             }
 
-                            await HandleWebSocketConnection(webSocket, route.Callback);
+                            await HandleWebSocketConnection(webSocket, route.Callback, req);
                         }
                     }
 
@@ -189,7 +189,7 @@ namespace ExpressCS
             }
         }
 
-        private static async Task HandleWebSocketConnection(WebSocket webSocket, Func<WebSocketRequest, WebSocketResponse, Task> callback)
+        private static async Task HandleWebSocketConnection(WebSocket webSocket, Func<WebSocketRequest, WebSocketResponse, Task> callback, HttpListenerRequest req)
         {
             byte[] buffer = new byte[1024 * 4];
             while (webSocket.State == WebSocketState.Open)
@@ -199,9 +199,9 @@ namespace ExpressCS
 
                 WebSocketRequest request = new WebSocketRequest
                 {
-                    Url = webSocket.ToString(),
-                    Host = webSocket.ToString(),
-                    Headers = new NameValueCollection(),
+                    Url = req.Url.AbsolutePath,
+                    Host = req.UserHostAddress,
+                    Headers = req.Headers,
                     Data = message
                 };
 
