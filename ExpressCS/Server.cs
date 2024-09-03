@@ -32,42 +32,17 @@ namespace ExpressCS
                     {
                         if (req.Url.AbsolutePath == route.Path)
                         {
-                            HttpListenerWebSocketContext webSocketContext = await ctx.AcceptWebSocketAsync(null);
-                            WebSocket webSocket = webSocketContext.WebSocket;
-
-                            if (route.ConnectionEstablished != null)
-                            {
-                                WebSocketRequest request = new WebSocketRequest
-                                {
-                                    Url = webSocket.ToString(),
-                                    Host = webSocket.ToString(),
-                                    Headers = new NameValueCollection(),
-                                    Data = null
-                                };
-
-                                WebSocketResponse response = new WebSocketResponse
-                                {
-                                    Headers = new List<string>(),
-                                };
-
-                                await route.ConnectionEstablished(request, response);
-
-                                if (response.Data != null)
-                                {
-                                    byte[] responseBytes = Encoding.UTF8.GetBytes(response.Data);
-                                    await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
-                                }
-                            }
-
-                            await HandleWebSocketConnection(webSocket, route.Callback, req);
+                            await WebSocketHandler.HandleSocketIitialization(ctx, route);
                         }
                     }
 
                     continue;
                 }
 
+                //ERROR: System.Net.ProtocolViolationException: 'Bytes to be written to the stream exceed the Content-Length bytes size specified.'
                 if (req.HttpMethod == "HEAD")
                 {
+                    Console.WriteLine("HEAD request");
                     resp.Close();
                     continue;
                 }
@@ -189,35 +164,5 @@ namespace ExpressCS
             }
         }
 
-        private static async Task HandleWebSocketConnection(WebSocket webSocket, Func<WebSocketRequest, WebSocketResponse, Task> callback, HttpListenerRequest req)
-        {
-            byte[] buffer = new byte[1024 * 4];
-            while (webSocket.State == WebSocketState.Open)
-            {
-                WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
-                WebSocketRequest request = new WebSocketRequest
-                {
-                    Url = req.Url.AbsolutePath,
-                    Host = req.UserHostAddress,
-                    Headers = req.Headers,
-                    Data = message
-                };
-
-                WebSocketResponse response = new WebSocketResponse
-                {
-                    Headers = new List<string>()
-                };
-
-                await callback(request, response);
-
-                if (response.Data != null)
-                {
-                    byte[] responseBytes = Encoding.UTF8.GetBytes(response.Data);
-                    await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
-                }
-            }
-        }
     }
 }
