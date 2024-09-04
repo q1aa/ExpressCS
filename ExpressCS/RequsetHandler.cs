@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static ExpressCS.Struct.WebSocketRouteStruct;
 using ExpressCS.Struct;
+using ExpressCS.Utils;
 
 namespace ExpressCS
 {
@@ -54,28 +55,35 @@ namespace ExpressCS
             byte[] buffer = new byte[messageBytes];
             while (webSocket.State == WebSocketState.Open)
             {
-                WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
-                WebSocketRequest request = new WebSocketRequest
+                try
                 {
-                    Url = req.Url.AbsolutePath,
-                    Host = req.UserHostAddress,
-                    Headers = req.Headers,
-                    Data = message
-                };
+                    WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
 
-                WebSocketResponse response = new WebSocketResponse
+                    WebSocketRequest request = new WebSocketRequest
+                    {
+                        Url = req.Url.AbsolutePath,
+                        Host = req.UserHostAddress,
+                        Headers = req.Headers,
+                        Data = message
+                    };
+
+                    WebSocketResponse response = new WebSocketResponse
+                    {
+                        Headers = new List<string>()
+                    };
+
+                    await callback(request, response);
+
+                    if (response.Data != null)
+                    {
+                        byte[] responseBytes = Encoding.UTF8.GetBytes(response.Data);
+                        await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                    }
+                }
+                catch (Exception e)
                 {
-                    Headers = new List<string>()
-                };
-
-                await callback(request, response);
-
-                if (response.Data != null)
-                {
-                    byte[] responseBytes = Encoding.UTF8.GetBytes(response.Data);
-                    await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                    LogUtil.LogError($"{e.Message}  -  Url: {req.Url.AbsolutePath} - @{DateTime.Now}");
                 }
             }
         }
