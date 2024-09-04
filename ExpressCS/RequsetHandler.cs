@@ -47,11 +47,11 @@ namespace ExpressCS
                 }
             }
 
-            await HandleWebSocketConnection(webSocket, route.Callback, req);
+            await HandleWebSocketConnection(webSocket, route.Callback, req, route.MessageBytes);
         }
-        private static async Task HandleWebSocketConnection(WebSocket webSocket, Func<WebSocketRequest, WebSocketResponse, Task> callback, HttpListenerRequest req)
+        private static async Task HandleWebSocketConnection(WebSocket webSocket, Func<WebSocketRequest, WebSocketResponse, Task> callback, HttpListenerRequest req, int messageBytes)
         {
-            byte[] buffer = new byte[1024 * 4];
+            byte[] buffer = new byte[messageBytes];
             while (webSocket.State == WebSocketState.Open)
             {
                 WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);

@@ -93,13 +93,14 @@ namespace ExpressCS
             return Task.FromResult(true);
         }
 
-        public Task<bool> RegisterWebSocket(string path, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> callback, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> connectionEstablished)
+        public Task<bool> RegisterWebSocket(string path, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> callback, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> connectionEstablished, int messageBytes = 4096)
         {
             StorageUtil.WebSocketRoutes.Add(new WebSocketRouteStruct
             {
                 Path = path,
                 Callback = callback,
-                ConnectionEstablished = connectionEstablished
+                ConnectionEstablished = connectionEstablished,
+                MessageBytes = messageBytes
             });
 
             return Task.FromResult(true);

@@ -11,14 +11,15 @@ namespace ExpressCS.Struct
     {
         public string Path { get; set; }
         public Func<WebSocketRequest, WebSocketResponse, Task> Callback { get; set; }
-
         public Func<WebSocketRequest, WebSocketResponse, Task> ConnectionEstablished { get; set; }
+        public int MessageBytes { get; set; }
 
-        public WebSocketRouteStruct(string path, Func<WebSocketRequest, WebSocketResponse, Task> callback, Func<WebSocketRequest, WebSocketResponse, Task> connectionEstablished)
+        public WebSocketRouteStruct(string path, Func<WebSocketRequest, WebSocketResponse, Task> callback, Func<WebSocketRequest, WebSocketResponse, Task> connectionEstablished, int messageBytes)
         {
             Path = path;
             Callback = callback;
             ConnectionEstablished = connectionEstablished;
+            MessageBytes = messageBytes;
         }
 
         public class WebSocketRequest
