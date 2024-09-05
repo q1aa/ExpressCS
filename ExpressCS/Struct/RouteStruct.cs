@@ -30,7 +30,7 @@ namespace ExpressCS.Struct
             public NameValueCollection JSONBody { get; set; }
             public NameValueCollection Headers { get; set; }
             public string ContentType { get; set; }
-            public string[]? DynamicParams { get; set; }
+            public Dictionary<string, string>? DynamicParams { get; set; }
             public Dictionary<string, string>? QueryParams { get; set; }
         }
 

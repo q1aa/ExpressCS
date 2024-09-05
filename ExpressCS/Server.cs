@@ -26,14 +26,53 @@ namespace ExpressCS
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
 
-                if(req.IsWebSocketRequest)
+                if (req.IsWebSocketRequest)
                 {
+                    WebSocketRouteStruct? foundWebSocketRoute = null;
                     foreach (WebSocketRouteStruct route in StorageUtil.WebSocketRoutes)
                     {
-                        if (req.Url.AbsolutePath == route.Path)
+                        if(route.Path.Contains(":"))
                         {
-                            await WebSocketHandler.HandleSocketIitialization(ctx, route);
+                            string[] routePath = route.Path.Split('/');
+                            string[] reqPath = req.Url.AbsolutePath.Split('/');
+
+                            if (routePath.Length != reqPath.Length)
+                            {
+                                continue;
+                            }
+
+                            bool match = true;
+                            for (int i = 0; i < routePath.Length; i++)
+                            {
+                                if (routePath[i].StartsWith(":"))
+                                {
+                                    continue;
+                                }
+
+                                if (routePath[i] != reqPath[i])
+                                {
+                                    match = false;
+                                    break;
+                                }
+                            }
+
+                            if (match)
+                            {
+                                foundWebSocketRoute = route;
+                                break;
+                            }
                         }
+
+                        if (route.Path == req.Url.AbsolutePath)
+                        {
+                            foundWebSocketRoute = route;
+                        }
+                    }
+
+                    if (foundWebSocketRoute != null)
+                    {
+                        WebSocketHandler.HandleSocketIitialization(ctx, foundWebSocketRoute.Value);
+                        continue;
                     }
 
                     continue;
@@ -58,30 +97,20 @@ namespace ExpressCS
                     JSONBody = HelperUtil.parseJSONBody(rawBody),
                     QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
                     ContentType = req.ContentType,
-                    Headers = req.Headers
+                    Headers = req.Headers,
+                    DynamicParams = null
                 };
-
-                if (StorageUtil.Middleware != null)
-                {
-                    RouteStruct.Response routeResponse = new RouteStruct.Response();
-                    await StorageUtil.Middleware.Value.Callback(parsedRequest, routeResponse);
-
-                    if (routeResponse.Data != null)
-                    {
-                        await SendMethodes.handleResponse(resp, routeResponse);
-                        continue;
-                    }
-                }
 
                 RouteStruct? foundRoute = null;
                 foreach (RouteStruct route in StorageUtil.Routes)
                 {
-                    if(route.Path.Contains(":"))
+                    string reqURL = req.Url.AbsolutePath.EndsWith("/") ? req.Url.AbsolutePath.Remove(req.Url.AbsolutePath.Length - 1) : req.Url.AbsolutePath;
+                    if (route.Path.Contains(":"))
                     {
                         string[] routePath = route.Path.Split('/');
-                        string[] reqPath = req.Url.AbsolutePath.Split('/');
+                        string[] reqPath = reqURL.Split('/');
 
-                        if(routePath.Length != reqPath.Length)
+                        if (routePath.Length != reqPath.Length)
                         {
                             continue;
                         }
@@ -110,9 +139,47 @@ namespace ExpressCS
 
 
                     Struct.HttpMethod requstMethode = HelperUtil.convertRequestMethode(req.HttpMethod);
-                    if (route.Path == req.Url.AbsolutePath && (route.Methods.Contains(requstMethode) || route.Methods.Contains(Struct.HttpMethod.ANY)))
+                    if (route.Path == reqURL && (route.Methods.Contains(requstMethode) || route.Methods.Contains(Struct.HttpMethod.ANY)))
                     {
                         foundRoute = route;
+                    }
+                }
+
+                if (foundRoute == null) {
+                    if (StorageUtil.Middleware != null)
+                    {
+                        RouteStruct.Response routeResponse = new RouteStruct.Response();
+                        await StorageUtil.Middleware.Value.Callback(parsedRequest, routeResponse);
+                        if (routeResponse.Data != null)
+                        {
+                            await SendMethodes.handleResponse(resp, routeResponse);
+                            continue;
+                        }
+                    }
+
+                    if (StorageUtil.CustomError != null)
+                    {
+                        RouteStruct.Response routeResponse = new RouteStruct.Response();
+                        await StorageUtil.CustomError.Value.Callback(parsedRequest, routeResponse);
+
+                        await SendMethodes.handleResponse(resp, routeResponse);
+                        continue;
+                    }
+
+                    await SendMethodes.handleResponse(resp, getErrorResponse());
+                }
+
+                parsedRequest.DynamicParams = HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, req.Url.AbsolutePath);
+
+
+                if (StorageUtil.Middleware != null)
+                {
+                    RouteStruct.Response routeResponse = new RouteStruct.Response();
+                    await StorageUtil.Middleware.Value.Callback(parsedRequest, routeResponse);
+                    if(routeResponse.Data != null)
+                    {
+                        await SendMethodes.handleResponse(resp, routeResponse);
+                        continue;
                     }
                 }
 
@@ -154,15 +221,19 @@ namespace ExpressCS
                     await SendMethodes.handleResponse(resp, routeResponse);
                     continue;
                 }
-                await SendMethodes.handleResponse(resp, new RouteStruct.Response
-                {
-                    Data = "<html><body><h1>404 Not Found</h1></body></html>",
-                    ContentType = "text/html",
-                    ContentEncoding = Encoding.UTF8,
-                    ContentLength64 = Encoding.UTF8.GetByteCount("<html><body><h1>404 Not Found</h1></body></html>")
-                });
+                await SendMethodes.handleResponse(resp, getErrorResponse());
             }
         }
 
+        private static RouteStruct.Response getErrorResponse()
+        {
+            return new RouteStruct.Response
+            {
+                Data = "<html><body><h1>404 Not Found</h1></body></html>",
+                ContentType = "text/html",
+                ContentEncoding = Encoding.UTF8,
+                ContentLength64 = Encoding.UTF8.GetByteCount("<html><body><h1>404 Not Found</h1></body></html>")
+            };
+        }
     }
 }

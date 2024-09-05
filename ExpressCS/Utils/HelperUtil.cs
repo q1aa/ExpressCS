@@ -27,23 +27,25 @@ namespace ExpressCS.Utils
             };
         }
 
-        public static string[] getDynamicParamsFromURL(RouteStruct route, string url)
+        public static Dictionary<string, string> getDynamicParamsFromURL(string routeURL, string browserURL)
         {
-            string[] routePath = route.Path.Split('/');
-            string[] reqPath = url.Split('/');
+            if(browserURL.EndsWith("/")) browserURL = browserURL.Remove(browserURL.Length - 1);
 
-            List<string> dynamicParams = new List<string>();
+            string[] routePath = routeURL.Split('/');
+            string[] reqPath = browserURL.Split('/');
+
+            Dictionary<string, string> dynamicParams = new Dictionary<string, string>();
 
             for (int i = 0; i < routePath.Length; i++)
             {
                 if (routePath[i].StartsWith(":"))
                 {
-                    dynamicParams.Add(reqPath[i]);
+                    dynamicParams.Add(routePath[i].Substring(1), reqPath[i]);
                 }
             }
 
-            if (dynamicParams.Count == 0) return null;
-            return dynamicParams.ToArray();
+            if (dynamicParams.Count == 0) return new Dictionary<string, string>();
+            return dynamicParams;
         }
 
         public static Dictionary<string, string> getQueryParamsFromURL(string url)

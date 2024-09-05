@@ -105,5 +105,10 @@ namespace ExpressCS
 
             return Task.FromResult(true);
         }
+
+        public Task<bool> RegisterWebSocket(string path, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> callback, int messageBytes = 4096)
+        {
+            return RegisterWebSocket(path, callback, null, messageBytes);
+        }
     }
 }

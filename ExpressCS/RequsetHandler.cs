@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using static ExpressCS.Struct.WebSocketRouteStruct;
 using ExpressCS.Struct;
 using ExpressCS.Utils;
+using Microsoft.AspNetCore.Http;
 
 namespace ExpressCS
 {
@@ -48,9 +49,9 @@ namespace ExpressCS
                 }
             }
 
-            await HandleWebSocketConnection(webSocket, route.Callback, req, route.MessageBytes);
+            await HandleWebSocketConnection(webSocket, route, req, route.MessageBytes);
         }
-        private static async Task HandleWebSocketConnection(WebSocket webSocket, Func<WebSocketRequest, WebSocketResponse, Task> callback, HttpListenerRequest req, int messageBytes)
+        private static async Task HandleWebSocketConnection(WebSocket webSocket, WebSocketRouteStruct route, HttpListenerRequest req, int messageBytes)
         {
             byte[] buffer = new byte[messageBytes];
             while (webSocket.State == WebSocketState.Open)
@@ -65,7 +66,8 @@ namespace ExpressCS
                         Url = req.Url.AbsolutePath,
                         Host = req.UserHostAddress,
                         Headers = req.Headers,
-                        Data = message
+                        Data = message,
+                        DynamicParams = HelperUtil.getDynamicParamsFromURL(route.Path, req.Url.AbsolutePath)
                     };
 
                     WebSocketResponse response = new WebSocketResponse
@@ -73,7 +75,7 @@ namespace ExpressCS
                         Headers = new List<string>()
                     };
 
-                    await callback(request, response);
+                    await route.Callback(request, response);
 
                     if (response.Data != null)
                     {
