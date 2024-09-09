@@ -31,7 +31,7 @@ namespace ExpressCS
                     WebSocketRouteStruct? foundWebSocketRoute = null;
                     foreach (WebSocketRouteStruct route in StorageUtil.WebSocketRoutes)
                     {
-                        if(route.Path.Contains(":"))
+                        if (route.Path.Contains(":"))
                         {
                             string[] routePath = route.Path.Split('/');
                             string[] reqPath = req.Url.AbsolutePath.Split('/');
@@ -86,7 +86,9 @@ namespace ExpressCS
                     continue;
                 }
 
-                string rawBody = req.HasEntityBody ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd() : null;
+                string rawBody = req.HasEntityBody
+                    ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd()
+                    : null;
                 RouteStruct.Request parsedRequest = new RouteStruct.Request()
                 {
                     Url = req.Url.AbsolutePath,
@@ -104,7 +106,9 @@ namespace ExpressCS
                 RouteStruct? foundRoute = null;
                 foreach (RouteStruct route in StorageUtil.Routes)
                 {
-                    string reqURL = req.Url.AbsolutePath.EndsWith("/") ? req.Url.AbsolutePath.Remove(req.Url.AbsolutePath.Length - 1) : req.Url.AbsolutePath;
+                    string reqURL = req.Url.AbsolutePath.EndsWith("/")
+                        ? req.Url.AbsolutePath.Remove(req.Url.AbsolutePath.Length - 1)
+                        : req.Url.AbsolutePath;
                     if (route.Path.Contains(":"))
                     {
                         string[] routePath = route.Path.Split('/');
@@ -130,7 +134,7 @@ namespace ExpressCS
                             }
                         }
 
-                        if(match)
+                        if (match)
                         {
                             foundRoute = route;
                             break;
@@ -139,13 +143,15 @@ namespace ExpressCS
 
 
                     Struct.HttpMethod requstMethode = HelperUtil.convertRequestMethode(req.HttpMethod);
-                    if (route.Path == reqURL && (route.Methods.Contains(requstMethode) || route.Methods.Contains(Struct.HttpMethod.ANY)))
+                    if (route.Path == reqURL && (route.Methods.Contains(requstMethode) ||
+                                                 route.Methods.Contains(Struct.HttpMethod.ANY)))
                     {
                         foundRoute = route;
                     }
                 }
 
-                if (foundRoute == null) {
+                if (foundRoute == null)
+                {
                     if (StorageUtil.Middleware != null)
                     {
                         RouteStruct.Response routeResponse = new RouteStruct.Response();
@@ -156,27 +162,13 @@ namespace ExpressCS
                             continue;
                         }
                     }
-                    
-                    bool errorStaticFileFound = false;
-                    foreach (StaticFileStruct staticFile in StorageUtil.StaticFiles)
-                    {
-                        if (req.Url.AbsolutePath.StartsWith(staticFile.WebPath))
-                        {
-                            string filePath = req.Url.AbsolutePath.Replace(staticFile.WebPath, "");
-                            if (!File.Exists(staticFile.DirectoryPath.FullName + "/" + filePath))
-                            {
-                                continue;
-                            }
 
-                            errorStaticFileFound = true;
-                            await SendMethodes.handleResponse(resp, new RouteStruct.Response
-                            {
-                                ResponseType = ResponseType.SENDFILE,
-                                Data = staticFile.DirectoryPath.FullName + "/" + filePath
-                            });
-                        }
+                    RouteStruct.Response? errorStaticFileResponse = staticFileExists(req.Url.AbsolutePath);
+                    if (errorStaticFileResponse != null)
+                    {
+                        await SendMethodes.handleResponse(resp, errorStaticFileResponse);
+                        continue;
                     }
-                    if (errorStaticFileFound) continue;
 
                     if (StorageUtil.CustomError != null)
                     {
@@ -187,18 +179,19 @@ namespace ExpressCS
                         continue;
                     }
 
-                    await SendMethodes.handleResponse(resp, getErrorResponse());
+                    await SendMethodes.handleResponse(resp, getDefaultErrorResponse());
                     continue;
                 }
 
-                parsedRequest.DynamicParams = HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, req.Url.AbsolutePath);
+                parsedRequest.DynamicParams =
+                    HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, req.Url.AbsolutePath);
 
 
                 if (StorageUtil.Middleware != null)
                 {
                     RouteStruct.Response routeResponse = new RouteStruct.Response();
                     await StorageUtil.Middleware.Value.Callback(parsedRequest, routeResponse);
-                    if(routeResponse.Data != null)
+                    if (routeResponse.Data != null)
                     {
                         await SendMethodes.handleResponse(resp, routeResponse);
                         continue;
@@ -213,26 +206,12 @@ namespace ExpressCS
                     continue;
                 }
 
-                bool staticFileFound = false;
-                foreach (StaticFileStruct staticFile in StorageUtil.StaticFiles)
+                RouteStruct.Response? staticFileResponse = staticFileExists(req.Url.AbsolutePath);
+                if (staticFileResponse != null)
                 {
-                    if (req.Url.AbsolutePath.StartsWith(staticFile.WebPath))
-                    {
-                        string filePath = req.Url.AbsolutePath.Replace(staticFile.WebPath, "");
-                        if (!File.Exists(staticFile.DirectoryPath.FullName + "/" + filePath))
-                        {
-                            continue;
-                        }
-
-                        staticFileFound = true;
-                        await SendMethodes.handleResponse(resp, new RouteStruct.Response
-                        {
-                            ResponseType = ResponseType.SENDFILE,
-                            Data = staticFile.DirectoryPath.FullName + "/" + filePath
-                        });
-                    }
+                    await SendMethodes.handleResponse(resp, staticFileResponse);
+                    continue;
                 }
-                if (staticFileFound) continue;
 
 
                 if (StorageUtil.CustomError != null)
@@ -243,11 +222,12 @@ namespace ExpressCS
                     await SendMethodes.handleResponse(resp, routeResponse);
                     continue;
                 }
-                await SendMethodes.handleResponse(resp, getErrorResponse());
+
+                await SendMethodes.handleResponse(resp, getDefaultErrorResponse());
             }
         }
 
-        private static RouteStruct.Response getErrorResponse()
+        private static RouteStruct.Response getDefaultErrorResponse()
         {
             return new RouteStruct.Response
             {
@@ -256,6 +236,27 @@ namespace ExpressCS
                 ContentEncoding = Encoding.UTF8,
                 ContentLength64 = Encoding.UTF8.GetByteCount("<html><body><h1>404 Not Found</h1></body></html>")
             };
+        }
+
+        private static RouteStruct.Response? staticFileExists(string requestURL)
+        {
+            foreach (StaticFileStruct staticFile in StorageUtil.StaticFiles)
+            {
+                if (requestURL.StartsWith(staticFile.WebPath))
+                {
+                    string filePath = requestURL.Replace(staticFile.WebPath, "");
+                    if (File.Exists(staticFile.DirectoryPath.FullName + "/" + filePath))
+                    {
+                        return new RouteStruct.Response
+                        {
+                            ResponseType = ResponseType.SENDFILE,
+                            Data = staticFile.DirectoryPath.FullName + "/" + filePath
+                        };
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }
