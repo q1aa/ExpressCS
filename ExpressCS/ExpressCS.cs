@@ -23,18 +23,28 @@ namespace ExpressCS
             StorageUtil.Listener = new HttpListener();
             StorageUtil.Listener.Prefixes.Add($"{(config.Ssl ? "https" : "http")}://{config.Host}:{config.Port}/");
             StorageUtil.Listener.Start();
-
-            Console.WriteLine("---------------------------------");
+            
+            LogUtil.Log($"Server started on {config.Host}:{config.Port}");
+            LogUtil.Log($"Access the server at {StorageUtil.Listener.Prefixes.FirstOrDefault()})");
+            
+            /*LogUtil.Log("---------Registered Static Files---------");
+            foreach (var staticFile in StorageUtil.StaticFiles)
+            {
+                LogUtil.Log($"Registered static files: {staticFile.WebPath} -> {staticFile.DirectoryPath.FullName}, {staticFile.DirectoryPath.GetFiles().Length} files");
+            }*/
+                
+            if(StorageUtil.Routes.Count > 0) Console.WriteLine("---------Registered Routes---------");
             foreach (var routes in StorageUtil.Routes)
             {
                 LogUtil.LogRouteRegister(routes.Path, routes.Methods);
             }
-            Console.WriteLine("---------------------------------");
+            
+            if(StorageUtil.WebSocketRoutes.Count > 0) Console.WriteLine("---------Registered WebSocket Routes---------");
             foreach (var route in StorageUtil.WebSocketRoutes)
             {
                 LogUtil.LogRouteRegister(route.Path, new Struct.HttpMethod[] { }, true);
             }
-            Console.WriteLine("---------------------------------");
+            if(StorageUtil.WebSocketRoutes.Count > 0) Console.WriteLine("---------------------------------");
 
             Task listenTask = Server.HandleIncomeRequests();
             callback.Invoke();

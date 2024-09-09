@@ -167,6 +167,7 @@ namespace ExpressCS
                     }
 
                     await SendMethodes.handleResponse(resp, getErrorResponse());
+                    continue;
                 }
 
                 parsedRequest.DynamicParams = HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, req.Url.AbsolutePath);
