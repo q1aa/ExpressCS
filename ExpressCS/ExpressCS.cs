@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Runtime.CompilerServices;
 using ExpressCS.Struct;
 using ExpressCS.Types;
 using ExpressCS.Utils;
@@ -26,20 +27,28 @@ namespace ExpressCS
             
             LogUtil.Log($"Server started on {config.Host}:{config.Port}");
             LogUtil.Log($"Access the server at {StorageUtil.Listener.Prefixes.FirstOrDefault()})");
-            
-            /*LogUtil.Log("---------Registered Static Files---------");
+
+            LogUtil.Log("---------Registered Static Files---------", prefix: false);
             foreach (var staticFile in StorageUtil.StaticFiles)
             {
-                LogUtil.Log($"Registered static files: {staticFile.WebPath} -> {staticFile.DirectoryPath.FullName}, {staticFile.DirectoryPath.GetFiles().Length} files");
-            }*/
-                
-            if(StorageUtil.Routes.Count > 0) Console.WriteLine("---------Registered Routes---------");
+                if (!staticFile.DirectoryPath.Exists)
+                {
+                    LogUtil.LogWarning($"Directory {staticFile.DirectoryPath.FullName} does not exist");
+                    continue;
+                }
+                LogUtil.LogPublicDirectory(
+                    $"Registered static files: {staticFile.WebPath} -> {staticFile.DirectoryPath.FullName}",
+                    staticFile.DirectoryPath.GetFiles().Length);
+            }
+
+            if (StorageUtil.Routes.Count > 0) LogUtil.Log("---------Registered Routes---------", prefix: false);
             foreach (var routes in StorageUtil.Routes)
             {
                 LogUtil.LogRouteRegister(routes.Path, routes.Methods);
             }
-            
-            if(StorageUtil.WebSocketRoutes.Count > 0) Console.WriteLine("---------Registered WebSocket Routes---------");
+
+            if (StorageUtil.WebSocketRoutes.Count > 0)
+                LogUtil.Log("---------Registered WebSocket Routes---------", prefix: false);
             foreach (var route in StorageUtil.WebSocketRoutes)
             {
                 LogUtil.LogRouteRegister(route.Path, new Struct.HttpMethod[] { }, true);
