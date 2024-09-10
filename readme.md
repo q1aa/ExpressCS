@@ -1,22 +1,24 @@
 # Express.CS 🚀
 
 Welcome to the **Express.CS**! This project is a simple yet powerful server built with C# that demonstrates various functionalities such as routing, file handling, custom headers, middleware, and custom error handling.
-The usage is designed to be as similar as <a href="https://github.com/expressjs/express">express.js</a> as possible, also tis project inspired me :D
+The usage is designed to be as similar as <a href="https://github.com/expressjs/express">express.js</a> as possible, also this project inspired me :D
 
 ## Features ✨
 
-- **Routing**: Handle different routes with ease.
-- **File Handling**: Download and send files effortlessly.
-- **Custom Headers**: Add and manage custom headers.
-- **Middleware**: Implement middleware for additional processing.
-- **Custom Error Handling**: Define custom error pages.
+- [**Routing**](#Routing): Handle different routes with ease.
+- [**File Handling**](#file-download): Download and send files effortlessly.
+- [**Custom Headers**](#custom-headers): Add and manage custom headers.
+- [**Middleware**](#middleware): Implement middleware for additional processing.
+- [**Custom Error Handling**](#custom-error-handling): Define custom error pages.
+- [**Razor Engine Support**](#using-razor):  Integrate Razor for dynamic HTML generation.
+- [**WebSocket Support**](#WebSockets): Easily enable real-time communication with WebSockets.
 
 ## Getting Started 🛠️
 
 ### Prerequisites
 
 - .NET SDK
-- A code editor like Visual Studio Code, or Visual Studio Community Edition as i prefer.
+- A code editor like Visual Studio Code, or Visual Studio Community Edition as I prefer.
 
 ### Installation
 
