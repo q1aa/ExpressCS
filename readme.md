@@ -53,6 +53,8 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
     6.1 For a simple "Hello World" example, check out [this link](#hello-world-example).
 
     6.2 For a Example how to use the Razor engine with it, [this link](#using-razor).
+
+    6.3 For a Example how to use WebSockets, [this link](#WebSockets).
 7. Build and run the project:
     ```sh
     dotnet run
@@ -192,6 +194,36 @@ Logs the request URL:
 server.MiddleWare(async (req, res) =>
 {
     Console.WriteLine($"Middleware: {req.Url}");
+});
+```
+
+# WebSockets
+### Register a WebSocket route
+``` csharp
+server.RegisterWebSocket("/ws", async (req, res) =>
+{
+    res.Data = $"Hello World!, message: {req.Data}";
+});
+```
+
+### Register a WebSocket route with a dynamic URL
+``` csharp
+server.RegisterWebSocket("/dynamic/:id1/:id2", async (req, res) =>
+{
+    string dynamicParmsString = req.DynamicParams.Keys.Aggregate((i, j) => i + " " + j) + " / " +  req.DynamicParams.Values.Aggregate((i, j) => i + " " + j);
+    res.Data = $"Dynamic route with params: {dynamicParmsString}";
+});
+```
+
+### Register a WebSocket route with a Callback when the connection is established
+``` csharp
+server.RegisterWebSocket("/ws", async (req, res) =>
+{
+    res.Data = $"Hello World!, message: {req.Data}";
+}, async (req, res) =>
+{
+    Console.WriteLine("Callback, Connection established");
+    res.Data = "Connection established";
 });
 ```
 
