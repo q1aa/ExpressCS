@@ -36,9 +36,7 @@ namespace ExpressCS
                     LogUtil.LogWarning($"Directory {staticFile.DirectoryPath.FullName} does not exist");
                     continue;
                 }
-                LogUtil.LogPublicDirectory(
-                    $"Registered static files: {staticFile.WebPath} -> {staticFile.DirectoryPath.FullName}",
-                    staticFile.DirectoryPath.GetFiles().Length);
+                LogUtil.LogPublicDirectory(staticFile.WebPath, staticFile.DirectoryPath.FullName, staticFile.DirectoryPath.GetFiles().Length);
             }
 
             if (StorageUtil.Routes.Count > 0) LogUtil.Log("---------Registered Routes---------", prefix: false);
@@ -91,7 +89,7 @@ namespace ExpressCS
             {
                 Callback = callback
             };
-            LogUtil.Log("Custom error handler registered" + (StorageUtil.CustomError != null ? " successfully" : " unsuccessfully"));
+            LogUtil.Log("Custom error page registered" + (StorageUtil.CustomError != null ? " successfully" : " unsuccessfully"));
             return Task.FromResult(true);
         }
 
@@ -108,7 +106,6 @@ namespace ExpressCS
         public Task<bool> StaticDirectory(string webPath, DirectoryInfo directory)
         {
             StorageUtil.StaticFiles.Add(new StaticFileStruct(webPath, directory));
-            LogUtil.Log($"Registered static files: {webPath} -> {directory.FullName}");
             return Task.FromResult(true);
         }
 

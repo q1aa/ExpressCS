@@ -51,9 +51,9 @@ namespace ExpressCS.Utils
             Console.ResetColor();
         }
         
-        public static void LogPublicDirectory(string path, int fileCount = 0, ConsoleColor color = ConsoleColor.Green)
+        public static void LogPublicDirectory(string webPath, string serverPath, int fileCount = 0, ConsoleColor color = ConsoleColor.Green)
         {
-            Log($"Public directory registered: {path}, {fileCount} files", color);
+            Log($"Public directory registered: {webPath} @ {serverPath}, {fileCount} files found", color, false);
         }
     }
 }
