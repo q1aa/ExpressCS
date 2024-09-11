@@ -18,5 +18,14 @@ namespace ExpressCS.Utils
         public static RouteStruct? CustomError { get; set; } = null;
         public static RouteStruct? Middleware { get; set; } = null;
         public static List<StaticFileStruct> StaticFiles { get; set; } = new List<StaticFileStruct>();
+
+        public static readonly RouteStruct.Response DefaultErrorResponse = new RouteStruct.Response
+        {
+            ContentType = "text/html",
+            ContentEncoding = Encoding.UTF8,
+            StatusCode = 404,
+            Data = "<html><body><h1>404 Not Found</h1></body></html>",
+            ResponseType = ResponseType.DATA
+        };
     }
 }

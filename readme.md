@@ -17,7 +17,7 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
 
 ### Prerequisites
 
-- .NET SDK
+- .NET SDK (mine is 8.0.+)
 - A code editor like Visual Studio Code, or Visual Studio Community Edition as I prefer.
 
 ### Installation

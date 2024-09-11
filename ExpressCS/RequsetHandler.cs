@@ -12,11 +12,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace ExpressCS
 {
-    class HttpRequestHandler
-    {
-
-    }
-
     public class WebSocketHandler
     {
         public static async Task HandleSocketIitialization(HttpListenerContext ctx, WebSocketRouteStruct route)

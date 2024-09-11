@@ -71,7 +71,7 @@ namespace ExpressCS
 
                     if (foundWebSocketRoute != null)
                     {
-                        WebSocketHandler.HandleSocketIitialization(ctx, foundWebSocketRoute.Value);
+                        await WebSocketHandler.HandleSocketIitialization(ctx, foundWebSocketRoute.Value);
                         continue;
                     }
 
@@ -170,16 +170,7 @@ namespace ExpressCS
                         continue;
                     }
 
-                    if (StorageUtil.CustomError != null)
-                    {
-                        RouteStruct.Response routeResponse = new RouteStruct.Response();
-                        await StorageUtil.CustomError.Value.Callback(parsedRequest, routeResponse);
-
-                        await SendMethodes.handleResponse(resp, routeResponse);
-                        continue;
-                    }
-
-                    await SendMethodes.handleResponse(resp, getDefaultErrorResponse());
+                    await SendMethodes.handleResponse(resp, await getErrorResponse(parsedRequest));
                     continue;
                 }
 
@@ -213,29 +204,19 @@ namespace ExpressCS
                     continue;
                 }
 
-
-                if (StorageUtil.CustomError != null)
-                {
-                    RouteStruct.Response routeResponse = new RouteStruct.Response();
-                    await StorageUtil.CustomError.Value.Callback(parsedRequest, routeResponse);
-
-                    await SendMethodes.handleResponse(resp, routeResponse);
-                    continue;
-                }
-
-                await SendMethodes.handleResponse(resp, getDefaultErrorResponse());
+                await SendMethodes.handleResponse(resp, await getErrorResponse(parsedRequest));
+                continue;
             }
         }
 
-        private static RouteStruct.Response getDefaultErrorResponse()
+        public static async Task<RouteStruct.Response> getErrorResponse(RouteStruct.Request request)
         {
-            return new RouteStruct.Response
-            {
-                Data = "<html><body><h1>404 Not Found</h1></body></html>",
-                ContentType = "text/html",
-                ContentEncoding = Encoding.UTF8,
-                ContentLength64 = Encoding.UTF8.GetByteCount("<html><body><h1>404 Not Found</h1></body></html>")
-            };
+            if (StorageUtil.CustomError == null) return await Task.FromResult(StorageUtil.DefaultErrorResponse);
+
+            RouteStruct.Response routeResponse = new RouteStruct.Response();
+            await StorageUtil.CustomError.Value.Callback(request, routeResponse);
+
+            return await Task.FromResult(routeResponse);
         }
 
         private static RouteStruct.Response? staticFileExists(string requestURL)

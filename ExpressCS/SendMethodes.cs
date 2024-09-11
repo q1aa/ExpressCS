@@ -50,6 +50,14 @@ namespace ExpressCS
 
         public static async Task<bool> downloadFile(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
+            if(!File.Exists(routeResponse.FileName))
+            {
+                LogUtil.LogError($"File {routeResponse.FileName} not found");
+                resp.StatusCode = 404;
+                resp.Close();
+                return false;
+            }
+
             byte[] data = File.ReadAllBytes(routeResponse.FileName);
             resp.ContentType = "application/octet-stream";
             resp.ContentLength64 = data.LongLength;
@@ -71,6 +79,14 @@ namespace ExpressCS
 
         public static async Task<bool> sendFile(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
+            if(!File.Exists(routeResponse.Data))
+            {
+                LogUtil.LogError($"File {routeResponse.Data} not found");
+                resp.StatusCode = 404;
+                resp.Close();
+                return false;
+            }
+
             using (FileStream fs = new FileStream(routeResponse.Data, FileMode.Open, FileAccess.Read))
             {
                 resp.ContentType = HelperUtil.getContentType(Path.GetExtension(routeResponse.Data));
