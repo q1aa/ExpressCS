@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using static ExpressCS.Struct.WebSocketRouteStruct;
 using ExpressCS.Struct;
 using ExpressCS.Utils;
-using Microsoft.AspNetCore.Http;
 
 namespace ExpressCS
 {
@@ -55,6 +54,7 @@ namespace ExpressCS
                 {
                     WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                     string message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    DownloadSizeUtil.AddWebSocketDownloadSize(result.Count);
 
                     WebSocketRequest request = new WebSocketRequest
                     {
@@ -75,6 +75,7 @@ namespace ExpressCS
                     if (response.Data != null)
                     {
                         byte[] responseBytes = Encoding.UTF8.GetBytes(response.Data);
+                        UploadSizeUtil.AddWebSocketUploadSize(responseBytes.Length);
                         await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
                     }
                 }

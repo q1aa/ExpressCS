@@ -12,11 +12,14 @@ namespace ExpressCS.Types
         public string Host { get; }
         public bool Ssl { get; }
 
-        public ConfigStruct(int port, string host, bool ssl)
+        public bool ShowTransferedDataSize { get; set; } = true;
+
+        public ConfigStruct(int port, string host, bool ssl, bool showTransferedDataSize)
         {
             Port = port;
             Host = host;
             Ssl = ssl;
+            ShowTransferedDataSize = showTransferedDataSize;
         }
     }
 }

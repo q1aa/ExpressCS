@@ -18,13 +18,15 @@ namespace ExpressCS
 {
     internal class Server
     {
-        public static async Task HandleIncomeRequests()
+        public static async Task HandleIncomeRequests(bool showTransferedDataSize)
         {
             while (true)
             {
                 HttpListenerContext ctx = await StorageUtil.Listener.GetContextAsync();
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
+
+                if(showTransferedDataSize) DownloadSizeUtil.AddDownloadSize(req.Headers, req.ContentLength64);
 
                 if (req.IsWebSocketRequest)
                 {
@@ -71,7 +73,7 @@ namespace ExpressCS
 
                     if (foundWebSocketRoute != null)
                     {
-                        await WebSocketHandler.HandleSocketIitialization(ctx, foundWebSocketRoute.Value);
+                        new Task(async () => await WebSocketHandler.HandleSocketIitialization(ctx, foundWebSocketRoute.Value)).Start();
                         continue;
                     }
 

@@ -20,6 +20,7 @@ namespace ExpressCS
                 resp.AddHeader(header.Split(':')[0], header.Split(':')[1]);
             });
 
+            UploadSizeUtil.AddUploadSize(resp.Headers, routeResponse.Data.Length);
 
             switch (routeResponse.ResponseType)
             {

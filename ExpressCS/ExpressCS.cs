@@ -8,9 +8,9 @@ namespace ExpressCS
 {
     public class ExpressCS
     {
-        public ConfigStruct CreateConfig(int port = 8080, string host = "localhost", bool ssl = false)
+        public ConfigStruct CreateConfig(int port = 8080, string host = "localhost", bool ssl = false, bool showTransferedDataSize = true)
         {
-            return new ConfigStruct(port, host, ssl);
+            return new ConfigStruct(port, host, ssl, showTransferedDataSize);
         }
 
         public Task<bool> StartUp(ConfigStruct config)
@@ -53,7 +53,9 @@ namespace ExpressCS
             }
             if(StorageUtil.WebSocketRoutes.Count > 0) Console.WriteLine("---------------------------------");
 
-            Task listenTask = Server.HandleIncomeRequests();
+            Task listenTask = Server.HandleIncomeRequests(config.ShowTransferedDataSize);
+            if(config.ShowTransferedDataSize) SizeUpdaterUtil.StartTransferUpdateTimer();
+
             callback.Invoke();
             listenTask.GetAwaiter().GetResult();
             StorageUtil.Listener.Close();
