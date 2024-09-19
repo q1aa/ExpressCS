@@ -32,7 +32,7 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
     cd ExpressCS-Project
     ```
 
-3. [download]("https://github.com/q1aa/ExpressCS/releases/tag/Default") the dll file and add it to the project by just adding these three lines inside the .csproj file
+3. [download](https://github.com/q1aa/ExpressCS/releases/tag/Default) the dll file and add it to the project by just adding these three lines inside the .csproj file
     ```
     <ItemGroup>
         <Reference Include="path_to_ExpressCS.dll" />
