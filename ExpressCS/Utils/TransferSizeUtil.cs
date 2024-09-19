@@ -61,6 +61,12 @@ namespace ExpressCS.Utils
     {
         public static Task StartTransferUpdateTimer(int interval = 200)
         {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                LogUtil.LogWarning("The transfer size display is only available on Windows");
+                return Task.CompletedTask;
+            }
+            
             Task.Run(async () =>
             {
                 while (true)
