@@ -22,32 +22,24 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
 
 ### Installation
 
-1. Download the DLL from the repository:
+1. Create a new C# project:
     ```sh
-    curl -L -o ExpressCS.dll https://github.com/q1aa/ExpressCS/releases/tag/Default
+    dotnet new console -n ExpressCS-Project
     ```
 
-2. Create a new C# project:
+2. Navigate to the project directory:
     ```sh
-    dotnet new console -n MyNewProject
+    cd ExpressCS-Project
     ```
 
-3. Navigate to the project directory:
-    ```sh
-    cd MyNewProject
+3. [download]("https://github.com/q1aa/ExpressCS/releases/tag/Default") the dll file and add it to the project by just adding these three lines inside the .csproj file
+    ```
+    <ItemGroup>
+        <Reference Include="path_to_ExpressCS.dll" />
+    </ItemGroup>
     ```
 
-4. Add the downloaded DLL to the project:
-    ```sh
-    dotnet add reference ../ExpressCS.dll
-    ```
-
-5. Restore the dependencies:
-    ```sh
-    dotnet restore
-    ```
-
-6. Open the `Program.cs` file and add the necessary using directives to import your DLL:
+4. Open the `Program.cs` file and add the necessary using directives to import your DLL:
     ```csharp
     using ExpressCS;
     ```
@@ -57,7 +49,7 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
     6.2 For a Example how to use the Razor engine with it, [this link](#using-razor).
 
     6.3 For a Example how to use WebSockets, [this link](#WebSockets).
-7. Build and run the project:
+5. Run the project:
     ```sh
     dotnet run
     ```
