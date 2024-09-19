@@ -59,6 +59,8 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
 
 ``` cs
 ConfigStruct config = new ExpressCS.ExpressCS().CreateConfig(port: 3000);
+//Change the startup to look like this:
+server.StartUp(config);
 ```
 
 <p>Callback after server started up</p>
