@@ -26,7 +26,9 @@ namespace ExpressCS
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
 
-                if(showTransferedDataSize) DownloadSizeUtil.AddDownloadSize(req.Headers, req.ContentLength64);
+                string requestURL = req.Url.AbsolutePath.ToLower();
+
+                if (showTransferedDataSize) DownloadSizeUtil.AddDownloadSize(req.Headers, req.ContentLength64);
 
                 if (req.IsWebSocketRequest)
                 {
@@ -36,7 +38,7 @@ namespace ExpressCS
                         if (route.Path.Contains(":"))
                         {
                             string[] routePath = route.Path.Split('/');
-                            string[] reqPath = req.Url.AbsolutePath.Split('/');
+                            string[] reqPath = requestURL.Split('/');
 
                             if (routePath.Length != reqPath.Length)
                             {
@@ -65,7 +67,7 @@ namespace ExpressCS
                             }
                         }
 
-                        if (route.Path == req.Url.AbsolutePath)
+                        if (route.Path == requestURL)
                         {
                             foundWebSocketRoute = route;
                         }
@@ -93,7 +95,7 @@ namespace ExpressCS
                     : null;
                 RouteStruct.Request parsedRequest = new RouteStruct.Request()
                 {
-                    Url = req.Url.AbsolutePath,
+                    Url = requestURL,
                     Method = req.HttpMethod,
                     Host = req.UserHostName,
                     UserAgent = req.UserAgent,
@@ -108,9 +110,9 @@ namespace ExpressCS
                 RouteStruct? foundRoute = null;
                 foreach (RouteStruct route in StorageUtil.Routes)
                 {
-                    string reqURL = req.Url.AbsolutePath.EndsWith("/")
-                        ? req.Url.AbsolutePath.Remove(req.Url.AbsolutePath.Length - 1)
-                        : req.Url.AbsolutePath;
+                    string reqURL = requestURL.EndsWith("/")
+                        ? requestURL.Remove(requestURL.Length - 1)
+                        : requestURL;
                     if (route.Path.Contains(":"))
                     {
                         string[] routePath = route.Path.Split('/');
@@ -165,7 +167,7 @@ namespace ExpressCS
                         }
                     }
 
-                    RouteStruct.Response? errorStaticFileResponse = staticFileExists(req.Url.AbsolutePath);
+                    RouteStruct.Response? errorStaticFileResponse = staticFileExists(requestURL);
                     if (errorStaticFileResponse != null)
                     {
                         await SendMethodes.handleResponse(resp, errorStaticFileResponse);
@@ -177,7 +179,7 @@ namespace ExpressCS
                 }
 
                 parsedRequest.DynamicParams =
-                    HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, req.Url.AbsolutePath);
+                    HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, requestURL);
 
 
                 if (StorageUtil.Middleware != null)
@@ -199,7 +201,7 @@ namespace ExpressCS
                     continue;
                 }
 
-                RouteStruct.Response? staticFileResponse = staticFileExists(req.Url.AbsolutePath);
+                RouteStruct.Response? staticFileResponse = staticFileExists(requestURL);
                 if (staticFileResponse != null)
                 {
                     await SendMethodes.handleResponse(resp, staticFileResponse);

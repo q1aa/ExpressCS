@@ -73,7 +73,7 @@ namespace ExpressCS
         {
             StorageUtil.Routes.Add(new RouteStruct
             {
-                Path = path,
+                Path = path.ToLower(),
                 Methods = method,
                 Callback = callback
             });
