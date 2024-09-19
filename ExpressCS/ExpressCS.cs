@@ -21,6 +21,12 @@ namespace ExpressCS
 
         public Task<bool> StartUp(ConfigStruct config, Func<Task> callback)
         {
+            if(NetworkHelper.IsPortInUse(config.Port))
+            {
+                LogUtil.LogError($"Application shutting down! Port {config.Port} is already in use, please use another port or close the application using the port");
+                return Task.FromResult(false);
+            }
+
             StorageUtil.Listener = new HttpListener();
             StorageUtil.Listener.Prefixes.Add($"{(config.Ssl ? "https" : "http")}://{config.Host}:{config.Port}/");
             StorageUtil.Listener.Start();
