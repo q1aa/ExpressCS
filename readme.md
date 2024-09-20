@@ -44,11 +44,11 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
     using ExpressCS;
     ```
 
-    6.1 For a simple "Hello World" example, check out [this link](#hello-world-example).
+    4.1 For a simple "Hello World" example, check out [this link](#hello-world-example).
 
-    6.2 For a Example how to use the Razor engine with it, [this link](#using-razor).
+    4.2 For a Example how to use the Razor engine with it, [this link](#using-razor).
 
-    6.3 For a Example how to use WebSockets, [this link](#WebSockets).
+    4.3 For a Example how to use WebSockets, [this link](#WebSockets).
 5. Run the project:
     ```sh
     dotnet run
