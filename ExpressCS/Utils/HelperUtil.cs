@@ -48,7 +48,7 @@ namespace ExpressCS.Utils
             return dynamicParams;
         }
 
-        public static Dictionary<string, string> getQueryParamsFromURL(string url)
+        public static Dictionary<string, string>? getQueryParamsFromURL(string url)
         {
             if (!url.Contains("?")) return null;
             

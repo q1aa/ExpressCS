@@ -95,13 +95,13 @@ namespace ExpressCS
                     : null;
                 RouteStruct.Request parsedRequest = new RouteStruct.Request()
                 {
-                    Url = requestURL,
+                    Url = req.Url.AbsolutePath,
                     Method = req.HttpMethod,
                     Host = req.UserHostName,
                     UserAgent = req.UserAgent,
                     Body = rawBody,
                     JSONBody = HelperUtil.parseJSONBody(rawBody),
-                    QueryParams = HelperUtil.getQueryParamsFromURL(req.RawUrl),
+                    QueryParams = HelperUtil.getQueryParamsFromURL(req.Url.PathAndQuery),
                     ContentType = req.ContentType,
                     Headers = req.Headers,
                     DynamicParams = null
@@ -179,7 +179,7 @@ namespace ExpressCS
                 }
 
                 parsedRequest.DynamicParams =
-                    HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, requestURL);
+                    HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, req.Url.AbsolutePath);
 
 
                 if (StorageUtil.Middleware != null)
