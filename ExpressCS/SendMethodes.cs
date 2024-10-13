@@ -13,13 +13,14 @@ namespace ExpressCS
     {
         public static async Task<bool> handleResponse(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
-            if (resp == null || routeResponse.StatusCode == -1) return false;
+            if (resp == null) return false;
 
             routeResponse.Headers?.ForEach(header =>
             {
                 resp.AddHeader(header.Split(':')[0], header.Split(':')[1]);
             });
 
+            if (routeResponse.Data == null) return false;
             UploadSizeUtil.AddUploadSize(resp.Headers, routeResponse.Data.Length);
 
             switch (routeResponse.ResponseType)
