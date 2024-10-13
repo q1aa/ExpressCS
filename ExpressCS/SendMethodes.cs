@@ -13,7 +13,7 @@ namespace ExpressCS
     {
         public static async Task<bool> handleResponse(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
-            if (resp == null) return false;
+            if (resp == null || routeResponse.StatusCode == -1) return false;
 
             routeResponse.Headers?.ForEach(header =>
             {
