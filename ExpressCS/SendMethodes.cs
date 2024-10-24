@@ -21,7 +21,7 @@ namespace ExpressCS
             });
 
             if (routeResponse.Data == null) return false;
-            UploadSizeUtil.AddUploadSize(resp.Headers, routeResponse.Data.Length);
+            UploadSizeUtil.AddUploadSize(routeResponse.Headers, routeResponse.Data.Length);
 
             switch (routeResponse.ResponseType)
             {

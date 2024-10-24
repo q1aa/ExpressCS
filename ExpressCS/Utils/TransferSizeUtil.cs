@@ -35,7 +35,7 @@ namespace ExpressCS.Utils
 
     internal class UploadSizeUtil
     {
-        public static void AddUploadSize(NameValueCollection headers, long bodyContentLenght)
+        public static void AddUploadSize(List<string> headers, long bodyContentLenght)
         {
             TransferSizeStorage.TotalUploadSize += CalculateHeaderSize(headers) + bodyContentLenght;
         }
@@ -45,12 +45,13 @@ namespace ExpressCS.Utils
             TransferSizeStorage.TotalUploadSize += dataSize;
         }
 
-        private static int CalculateHeaderSize(NameValueCollection headers)
+        private static int CalculateHeaderSize(List<string> headers)
         {
             int returnSize = 0;
-            foreach (KeyValuePair<string, string> header in headers)
+            foreach (string header in headers)
             {
-                returnSize += Encoding.UTF8.GetByteCount(header.Key) + Encoding.UTF8.GetByteCount(header.Value);
+                if (!header.Contains(":")) continue;
+                returnSize += Encoding.UTF8.GetByteCount(header.Split(":")[0]) + Encoding.UTF8.GetByteCount(header.Split(":")[1]);
             }
 
             return returnSize;
