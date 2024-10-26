@@ -28,9 +28,8 @@ namespace ExpressCS.Struct
             public string Url { get; set; }
             public string Host { get; set; }
             public NameValueCollection Headers { get; set; }
-            public Dictionary<string, string>? DynamicParams { get; set; }
-            public Dictionary<string, string>? QueryParams { get; set; }
-
+            public NameValueCollection? DynamicParams { get; set; }
+            public NameValueCollection? QueryParams { get; set; }
         }
 
         public class WebSocketResponse

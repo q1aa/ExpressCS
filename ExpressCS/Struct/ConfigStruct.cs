@@ -14,7 +14,7 @@ namespace ExpressCS.Types
 
         public bool ShowTransferedDataSize { get; set; } = true;
 
-        public ConfigStruct(int port, string host, bool ssl, bool showTransferedDataSize)
+        internal ConfigStruct(int port, string host, bool ssl, bool showTransferedDataSize)
         {
             Port = port;
             Host = host;

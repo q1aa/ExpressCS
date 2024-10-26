@@ -2,6 +2,7 @@
 using ExpressCS.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -14,11 +15,10 @@ namespace ExpressCS
         public static async Task<bool> handleResponse(HttpListenerResponse resp, RouteStruct.Response routeResponse)
         {
             if (resp == null) return false;
-
-            routeResponse.Headers?.ForEach(header =>
+            foreach (string headerKey in routeResponse.Headers)
             {
-                resp.AddHeader(header.Split(':')[0], header.Split(':')[1]);
-            });
+                resp.AddHeader(headerKey, routeResponse.Headers[headerKey]);
+            }
 
             if (routeResponse.Data == null) return false;
             UploadSizeUtil.AddUploadSize(routeResponse.Headers, routeResponse.Data.Length);

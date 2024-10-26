@@ -27,14 +27,14 @@ namespace ExpressCS.Utils
             };
         }
 
-        public static Dictionary<string, string> getDynamicParamsFromURL(string routeURL, string browserURL)
+        public static NameValueCollection getDynamicParamsFromURL(string routeURL, string browserURL)
         {
             if(browserURL.EndsWith("/")) browserURL = browserURL.Remove(browserURL.Length - 1);
 
             string[] routePath = routeURL.Split('/');
             string[] reqPath = browserURL.Split('/');
 
-            Dictionary<string, string> dynamicParams = new Dictionary<string, string>();
+            NameValueCollection dynamicParams = new NameValueCollection();
 
             for (int i = 0; i < routePath.Length; i++)
             {
@@ -44,15 +44,15 @@ namespace ExpressCS.Utils
                 }
             }
 
-            if (dynamicParams.Count == 0) return new Dictionary<string, string>();
+            if (dynamicParams.Count == 0) return new NameValueCollection();
             return dynamicParams;
         }
 
-        public static Dictionary<string, string>? getQueryParamsFromURL(string url)
+        public static NameValueCollection? getQueryParamsFromURL(string url)
         {
             if (!url.Contains("?")) return null;
-            
-            Dictionary<string, string> queryParams = new Dictionary<string, string>();
+
+            NameValueCollection queryParams = new NameValueCollection();
             foreach (string query in url.Split('?')[1].Split('&'))
             {
                 string[] queryParts = query.Split('=');
