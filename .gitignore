@@ -5,3 +5,5 @@
 /.vs
 /ExpressCS/obj
 /.idea
+/XUnitTest/bin
+/XUnitTest/obj
