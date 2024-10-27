@@ -131,6 +131,17 @@ server.RegisterRoute("/query", HttpMethod.GET, async (req, res) =>
 });
 ```
 
+### Dynamic Route
+
+Handles query parameters and sends a response:
+```csharp
+server.RegisterRoute("/dynamic/:id/:id2", HttpMethod.GET, async (req, res) =>
+{
+    NameValueCollection? reqParams = req.DynamicParams;
+    res.Send($"Dynamic route with id: {reqParams["id"]} and id2: {reqParams["id2"]}");    
+});
+```
+
 ### File Download
 
 Allows downloading a file:
@@ -167,8 +178,14 @@ Adds custom headers to the response:
 ```csharp
 server.RegisterRoute("/headers", HttpMethod.ANY, async (req, res) =>
 {
-    res.Headers = new List<string> { "Content-Type: text/html", "Custom-Header: test" };
-    res.Send($"<html><body><h1>Custom headers {res.Headers[0]} and {res.Headers[1]}</h1></body></html>");
+    res.AddHeaders(new NameValueCollection
+    {
+        { "Content-Type", "text/html" },
+        { "Custom-Header", "Custom-Header-Hello" }
+    });
+    res.Send($"<html><body><h1>Custom headers: {res.Headers.AllKeys.Select(key => 
+    $"{key}: {res.Headers[key]}").Aggregate((a, b) => 
+    $"{a}, {b}")}</h1></body></html>");
 });
 ```
 
@@ -206,7 +223,7 @@ server.RegisterWebSocket("/ws", async (req, res) =>
 ``` csharp
 server.RegisterWebSocket("/dynamic/:id1/:id2", async (req, res) =>
 {
-    string dynamicParmsString = req.DynamicParams.Keys.Aggregate((i, j) => i + " " + j) + " / " +  req.DynamicParams.Values.Aggregate((i, j) => i + " " + j);
+    string dynamicParmsString = string.Join(Environment.NewLine, req.DynamicParams);
     res.Data = $"Dynamic route with params: {dynamicParmsString}";
 });
 ```
