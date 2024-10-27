@@ -223,8 +223,7 @@ server.RegisterWebSocket("/ws", async (req, res) =>
 ``` csharp
 server.RegisterWebSocket("/dynamic/:id1/:id2", async (req, res) =>
 {
-    string dynamicParmsString = string.Join(Environment.NewLine, req.DynamicParams);
-    res.Data = $"Dynamic route with params: {dynamicParmsString}";
+    res.Data = $"Dynamic route with params: {req.DynamicParams.AllKeys.Select(key => $"{key}: {req.DynamicParams[key]}").Aggregate((a, b) => $"{a}, {b}")}";
 });
 ```
 
