@@ -158,11 +158,11 @@ namespace ExpressCS
                 {
                     if (StorageUtil.Middleware != null)
                     {
-                        RouteStruct.Response routeResponse = new RouteStruct.Response();
-                        await StorageUtil.Middleware.Value.Callback(parsedRequest, routeResponse);
-                        if (routeResponse.Data != null)
+                        RouteStruct.Response errorRouteResponse = new RouteStruct.Response();
+                        await StorageUtil.Middleware.Value.Callback(parsedRequest, errorRouteResponse);
+                        if (errorRouteResponse.Data != null)
                         {
-                            await SendMethodes.handleResponse(resp, routeResponse);
+                            await SendMethodes.handleResponse(resp, errorRouteResponse);
                             continue;
                         }
                     }
@@ -182,9 +182,9 @@ namespace ExpressCS
                     HelperUtil.getDynamicParamsFromURL(foundRoute.Value.Path, req.Url.AbsolutePath);
 
 
+                RouteStruct.Response routeResponse = new RouteStruct.Response();
                 if (StorageUtil.Middleware != null)
                 {
-                    RouteStruct.Response routeResponse = new RouteStruct.Response();
                     await StorageUtil.Middleware.Value.Callback(parsedRequest, routeResponse);
                     if (routeResponse.Data != null)
                     {
@@ -195,7 +195,6 @@ namespace ExpressCS
 
                 if (foundRoute != null)
                 {
-                    RouteStruct.Response routeResponse = new RouteStruct.Response();
                     await foundRoute.Value.Callback(parsedRequest, routeResponse);
                     await SendMethodes.handleResponse(resp, routeResponse);
                     continue;
