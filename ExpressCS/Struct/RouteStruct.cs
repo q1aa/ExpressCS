@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ExpressCS.Struct
@@ -51,6 +52,13 @@ namespace ExpressCS.Struct
             {
                 Data = data;
                 ResponseType = ResponseType.DATA;
+            }
+
+            public void SendJSON<T>(T data)
+            {
+                Data = JsonSerializer.Serialize(data);
+                ResponseType = ResponseType.DATA;
+                ContentType = "application/json";
             }
 
             public void Download(string filePath, string? fileName = null)

@@ -172,6 +172,16 @@ server.RegisterRoute("/redirect", HttpMethod.GET, async (req, res) =>
 });
 ```
 
+### Send JSON
+
+Response with JSON
+```csharp
+server.RegisterRoute("/json", HttpMethod.GET, async (req, res) =>
+{
+    res.SendJSON(new { name = "John", age = 30 });
+});
+```
+
 ### Custom Headers
 
 Adds custom headers to the response:
