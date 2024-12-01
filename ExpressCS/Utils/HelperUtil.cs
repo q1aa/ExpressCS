@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -138,19 +139,25 @@ namespace ExpressCS.Utils
             if(body == null) return new NameValueCollection();
 
             NameValueCollection jsonBody = new NameValueCollection();
-            while(body != null)
+            try
             {
-                JsonNode jsonNode = JsonNode.Parse(body);
-                if (jsonNode == null) break;
-
-                if (jsonNode is JsonObject jsonObject)
+                while (body != null)
                 {
-                    foreach (KeyValuePair<string, JsonNode> jsonPair in jsonObject)
+                    JsonNode jsonNode = JsonNode.Parse(body);
+                    if (jsonNode == null) break;
+
+                    if (jsonNode is JsonObject jsonObject)
                     {
-                        jsonBody.Add(jsonPair.Key, jsonPair.Value.ToString());
+                        foreach (KeyValuePair<string, JsonNode> jsonPair in jsonObject)
+                        {
+                            jsonBody.Add(jsonPair.Key, jsonPair.Value.ToString());
+                        }
                     }
+                    break;
                 }
-                break;  
+            }
+            catch (Exception ex)
+            {
             }
 
             return jsonBody;
