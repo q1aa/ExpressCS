@@ -28,11 +28,13 @@ namespace ExpressCS.Struct
             public string Host { get; internal set; }
             public string UserAgent { get; internal set; }
             public string Body { get; internal set; }
-            public NameValueCollection JSONBody { get; internal set; }
+            public NameValueCollection? JSONBody { get; internal set; }
+            public NameValueCollection? FormDataBody { get; internal set; }
             public NameValueCollection Headers { get; internal set; }
             public string ContentType { get; internal set; }
             public NameValueCollection? DynamicParams { get; internal set; }
             public NameValueCollection? QueryParams { get; internal set; }
+            public ReceiveFileStruct[]? Files { get; internal set; }
         }
 
         public class Response

@@ -26,6 +26,12 @@ namespace ExpressCS
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
 
+                if(req.Url == null)
+                {
+                    resp.Close();
+                    continue;
+                }
+
                 string requestURL = req.Url.AbsolutePath.ToLower();
 
                 if (showTransferedDataSize) DownloadSizeUtil.AddDownloadSize(req.Headers, req.ContentLength64);
@@ -90,21 +96,44 @@ namespace ExpressCS
                     continue;
                 }
 
-                string rawBody = req.HasEntityBody
+                string? rawBody = null;
+                string? boundary = null;
+                ReceiveFileStruct[]? files = null;
+
+                //TODO: Add support for multipart/form-data
+                if (req.ContentType != null && req.ContentType.Contains("multipart/form-data"))
+                {
+                    using (Stream bodyStream = HelperUtil.CopyInputStream(req.InputStream))
+                    {
+                        boundary = req.ContentType.Split("boundary=")[1];
+                        rawBody = new StreamReader(bodyStream, req.ContentEncoding).ReadToEnd();
+                        bodyStream.Position = 0;
+                        files = await UploadFileUtil.HandleFileUpload(req, resp, bodyStream);
+                    }
+                }
+                else
+                {
+                    rawBody = req.HasEntityBody
                     ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd()
                     : null;
+                }
+
+                Console.WriteLine(files);
+
                 RouteStruct.Request parsedRequest = new RouteStruct.Request()
                 {
                     Url = req.Url.AbsolutePath,
                     Method = req.HttpMethod,
                     Host = req.UserHostName,
                     UserAgent = req.UserAgent,
-                    Body = rawBody,
+                    Body = rawBody ?? "",
                     JSONBody = HelperUtil.parseJSONBody(rawBody),
+                    FormDataBody = HelperUtil.parseFormDataBody(rawBody, boundary),
                     QueryParams = HelperUtil.getQueryParamsFromURL(req.Url.PathAndQuery),
                     ContentType = req.ContentType,
                     Headers = req.Headers,
-                    DynamicParams = null
+                    DynamicParams = null,
+                    Files = files
                 };
 
                 RouteStruct? foundRoute = null;

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ExpressCS.Utils
@@ -30,7 +31,7 @@ namespace ExpressCS.Utils
 
         public static NameValueCollection getDynamicParamsFromURL(string routeURL, string browserURL)
         {
-            if(browserURL.EndsWith("/")) browserURL = browserURL.Remove(browserURL.Length - 1);
+            if (browserURL.EndsWith("/")) browserURL = browserURL.Remove(browserURL.Length - 1);
 
             string[] routePath = routeURL.Split('/');
             string[] reqPath = browserURL.Split('/');
@@ -134,9 +135,9 @@ namespace ExpressCS.Utils
             };
         }
 
-        public static NameValueCollection parseJSONBody(string body)
+        public static NameValueCollection? parseJSONBody(string? body)
         {
-            if(body == null) return new NameValueCollection();
+            if (body == null) return null;
 
             NameValueCollection jsonBody = new NameValueCollection();
             try
@@ -161,6 +162,35 @@ namespace ExpressCS.Utils
             }
 
             return jsonBody;
+        }
+
+        public static NameValueCollection? parseFormDataBody(string? body, string? boundary)
+        {
+            if(boundary == null || body == null) return null;
+
+            NameValueCollection formData = new NameValueCollection();
+            body = body.Replace("--" + boundary + "--", "");
+            string[] parts = body.Split(new string[] { "--" + boundary }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string part in parts)
+            {
+                string[] lines = part.Split("\r\n").Skip(1).SkipLast(1).ToArray();
+                string key = lines[0].Trim().Split("name=\"")[1].Split("\"")[0];
+                string[] value = lines.Skip(2).ToArray();
+
+                formData.Add(key, string.Join("\r\n", value));
+            }
+
+            return formData;
+        }
+
+        public static Stream CopyInputStream(Stream stream)
+        {
+            MemoryStream ms = new MemoryStream();
+            stream.CopyTo(ms);
+            ms.Position = 0;
+            stream.Close();
+            return ms;
         }
     }
 }
