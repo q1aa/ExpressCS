@@ -328,6 +328,15 @@ by the way, the test.cshtml file looks like this
 </html>
 
 ```
+
+## Errors/TODO 📓
+"The specified network name is no longer available." -> inside the config set ignoreWriteExceptions: true ✅
+
+"Access is denied." -> start the application as administrator and inside the config set
+host: "*" ✅
+
+TODO: Fix the memory leaking when accessing/uploading files ❌
+
 ## Contributing 🤝
 
 Contributions are welcome! Please fork the repository and submit a pull request.
