@@ -8,9 +8,9 @@ namespace ExpressCS
 {
     public class ExpressCS
     {
-        public ConfigStruct CreateConfig(int port = 8080, string host = "localhost", bool ssl = false, bool showTransferedDataSize = true)
+        public ConfigStruct CreateConfig(int port = 8080, string host = "localhost", bool ssl = false, bool showTransferedDataSize = true, bool ignoreWriteExceptions = true)
         {
-            return new ConfigStruct(port, host, ssl, showTransferedDataSize);
+            return new ConfigStruct(port, host, ssl, showTransferedDataSize, ignoreWriteExceptions);
         }
 
         public Task<bool> StartUp(ConfigStruct config)
@@ -29,6 +29,7 @@ namespace ExpressCS
 
             StorageUtil.Listener = new HttpListener();
             StorageUtil.Listener.Prefixes.Add($"{(config.Ssl ? "https" : "http")}://{config.Host}:{config.Port}/");
+            StorageUtil.Listener.IgnoreWriteExceptions = config.IgnoreWriteExceptions;
             StorageUtil.Listener.Start();
             
             LogUtil.Log($"Server started on {config.Host}:{config.Port}");
