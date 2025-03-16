@@ -56,9 +56,9 @@ namespace ExpressCS.Struct
                 ResponseType = ResponseType.DATA;
             }
 
-            public void SendJSON<T>(T data)
+            public void SendJSON<T>(T data, JsonSerializerOptions? jsonSerializer = null)
             {
-                Data = JsonSerializer.Serialize(data);
+                Data = JsonSerializer.Serialize(data, jsonSerializer);
                 ResponseType = ResponseType.DATA;
                 ContentType = "application/json";
             }
