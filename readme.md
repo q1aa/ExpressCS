@@ -127,7 +127,7 @@ Handles query parameters and sends a response:
 ```csharp
 server.RegisterRoute("/query", HttpMethod.GET, async (req, res) =>
 {
-    res.Send($"<html><body><h1>Query route {req.Url} with querys: {queryParams["name"]} and {queryParams["age"]}</h1></body></html>");
+    res.Send($"<html><body><h1>Query route {req.Url} with querys: {req.QueryParams["name"]} and {req.QueryParams["age"]}</h1></body></html>");
 });
 ```
 
