@@ -1,13 +1,5 @@
-﻿using ExpressCS.Struct;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Collections.Specialized;
+using System.Text.Json;
 
 namespace ExpressCS.Utils
 {
@@ -138,29 +130,43 @@ namespace ExpressCS.Utils
         public static NameValueCollection parseJSONBody(string? body)
         {
             NameValueCollection jsonBody = new NameValueCollection();
+            if (string.IsNullOrWhiteSpace(body))
+                return jsonBody;
+
             try
             {
-                while (body != null)
-                {
-                    JsonNode jsonNode = JsonNode.Parse(body);
-                    if (jsonNode == null) break;
+                using JsonDocument doc = JsonDocument.Parse(body);
+                JsonElement root = doc.RootElement;
 
-                    if (jsonNode is JsonObject jsonObject)
+                if (root.ValueKind == JsonValueKind.Object)
+                {
+                    foreach (JsonProperty property in root.EnumerateObject())
                     {
-                        foreach (KeyValuePair<string, JsonNode> jsonPair in jsonObject)
-                        {
-                            jsonBody.Add(jsonPair.Key, jsonPair.Value.ToString());
-                        }
+                        jsonBody.Add(property.Name, property.Value.ToString());
                     }
-                    break;
+                }
+                else if (root.ValueKind == JsonValueKind.Array)
+                {
+                    int index = 0;
+                    foreach (JsonElement element in root.EnumerateArray())
+                    {
+                        jsonBody.Add($"[{index}]", element.ToString());
+                        index++;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Unsupported JSON format");
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"JSON Parsing Error: {ex.Message}");
             }
 
             return jsonBody;
         }
+
 
         public static NameValueCollection parseFormDataBody(string? body, string? boundary)
         {
@@ -184,11 +190,17 @@ namespace ExpressCS.Utils
 
         public static Stream CopyInputStream(Stream stream)
         {
-            MemoryStream ms = new MemoryStream();
-            stream.CopyTo(ms);
-            ms.Position = 0;
-            stream.Close();
-            return ms;
+            try
+            {
+                MemoryStream ms = new MemoryStream();
+                stream.CopyTo(ms);
+                ms.Position = 0;
+                return ms;
+            }
+            finally
+            {
+                stream.Close();
+            }
         }
     }
 }

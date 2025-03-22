@@ -12,7 +12,7 @@ using ExpressCS.Struct;
 
 namespace TestHttpListenerContext
 {
-    public class FormDataUtil: IDisposable
+    public class FormDataUtil
     {
         public List<ReceiveFileStruct> Files { get; } = new List<ReceiveFileStruct>();
         public Dictionary<string, string> Fields { get; } = new Dictionary<string, string>();
@@ -28,40 +28,30 @@ namespace TestHttpListenerContext
             ParseMultipartContent(stream, boundary, encoding).Wait();
         }
 
-        public void Dispose()
-        {
-            foreach (var file in Files)
-            {
-                file.Data.Dispose();
-            }
-        }
-
         private async Task ParseMultipartContent(Stream stream, string boundary, Encoding encoding)
         {
-            // Create temporary stream copy since MultipartFormDataContent needs a seekable stream
-            using (var ms = new MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
                 await stream.CopyToAsync(ms);
                 ms.Position = 0;
 
-                // Use .NET's built-in multipart content handler
-                var content = new MultipartFormDataContent("--" + boundary);
+                MultipartFormDataContent content = new MultipartFormDataContent("--" + boundary);
                 content.Headers.Remove("Content-Type");
                 content.Headers.TryAddWithoutValidation("Content-Type", $"multipart/form-data; boundary=\"{boundary}\"");
 
                 // Create a temporary HttpContent to extract the parts
-                using (var tempContent = new StreamContent(ms))
+                using (StreamContent tempContent = new StreamContent(ms))
                 {
                     tempContent.Headers.Remove("Content-Type");
-                    var reader = new MultipartReader(boundary, ms);
+                    MultipartReader reader = new MultipartReader(boundary, ms);
                     MultipartSection section;
                     while ((section = await reader.ReadNextSectionAsync()) != null)
                     {
-                        var contentDisposition = section.GetContentDispositionHeader();
+                        ContentDispositionHeaderValue  contentDisposition = section.GetContentDispositionHeader();
                         if (contentDisposition.IsFileDisposition())
                         {
-                            var fileSection = section.AsFileSection();
-                            var memoryStream = new MemoryStream();
+                            FileMultipartSection fileSection = section.AsFileSection();
+                            MemoryStream memoryStream = new MemoryStream();
                             await fileSection.FileStream.CopyToAsync(memoryStream);
                             memoryStream.Position = 0;
 
@@ -75,7 +65,7 @@ namespace TestHttpListenerContext
                         }
                         else if (contentDisposition.IsFormDisposition())
                         {
-                            var formSection = section.AsFormDataSection();
+                            FormMultipartSection formSection = section.AsFormDataSection();
                             var value = await formSection.GetValueAsync();
                             Fields[formSection.Name] = value;
                         }

@@ -29,10 +29,6 @@ namespace ExpressCS.Utils
                 Console.WriteLine($"Error: {ex.Message}");
                 return null;
             }
-            finally
-            {
-                stream.Close();
-            }
         }
     }
 }

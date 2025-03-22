@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Server.HttpSys;
 using static ExpressCS.Struct.WebSocketRouteStruct;
 using System.Net.WebSockets;
 using System.Collections.Specialized;
+using System.Reflection.PortableExecutable;
+using System.Runtime.InteropServices;
+using System.Runtime;
 
 
 namespace ExpressCS
@@ -26,7 +29,7 @@ namespace ExpressCS
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
 
-                if(req.Url == null)
+                if (req.Url == null)
                 {
                     resp.Close();
                     continue;
@@ -99,9 +102,10 @@ namespace ExpressCS
                 string? rawBody = null;
                 string? boundary = null;
                 ReceiveFileStruct[]? files = null;
+                bool fileUpload = false;
 
                 //TODO: Add support for multipart/form-data
-                if (req.ContentType != null && req.ContentType.Contains("multipart/form-data"))
+                if (req.ContentType != null && req.ContentType.Contains("multipart/form-data") && req.ContentType.Contains("boundary="))
                 {
                     using (Stream bodyStream = HelperUtil.CopyInputStream(req.InputStream))
                     {
@@ -110,15 +114,24 @@ namespace ExpressCS
                         bodyStream.Position = 0;
                         files = await UploadFileUtil.HandleFileUpload(req, resp, bodyStream);
                     }
+                    fileUpload = true;
                 }
                 else
                 {
-                    rawBody = req.HasEntityBody
-                    ? new StreamReader(req.InputStream, req.ContentEncoding).ReadToEnd()
-                    : null;
-                }
+                    StringBuilder sb = new StringBuilder();
+                    char[] buffer = new char[4096];
 
-                Console.WriteLine(files);
+                    using (StreamReader reader = new StreamReader(req.InputStream, req.ContentEncoding))
+                    {
+                        int bytesRead;
+                        while ((bytesRead = reader.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            sb.Append(buffer, 0, bytesRead);
+                        }
+                    }
+
+                    rawBody = sb.ToString();
+                }
 
                 RouteStruct.Request parsedRequest = new RouteStruct.Request()
                 {
@@ -127,7 +140,7 @@ namespace ExpressCS
                     Host = req.UserHostName,
                     UserAgent = req.UserAgent,
                     Body = rawBody ?? "",
-                    JSONBody = HelperUtil.parseJSONBody(rawBody),
+                    JSONBody = fileUpload ? new NameValueCollection() : HelperUtil.parseJSONBody(rawBody),
                     FormDataBody = HelperUtil.parseFormDataBody(rawBody, boundary),
                     QueryParams = HelperUtil.getQueryParamsFromURL(req.Url.PathAndQuery),
                     ContentType = req.ContentType,
@@ -192,6 +205,9 @@ namespace ExpressCS
                         if (errorRouteResponse.Data != null)
                         {
                             await SendMethodes.handleResponse(resp, errorRouteResponse);
+                            req.InputStream.Close();
+                            resp.Close();
+                            handleMemoryLeak(files);
                             continue;
                         }
                     }
@@ -200,10 +216,16 @@ namespace ExpressCS
                     if (errorStaticFileResponse != null)
                     {
                         await SendMethodes.handleResponse(resp, errorStaticFileResponse);
+                        req.InputStream.Close();
+                        resp.Close();
+                        handleMemoryLeak(files);
                         continue;
                     }
 
                     await SendMethodes.handleResponse(resp, await getErrorResponse(parsedRequest));
+                    req.InputStream.Close();
+                    resp.Close();
+                    handleMemoryLeak(files);
                     continue;
                 }
 
@@ -218,6 +240,9 @@ namespace ExpressCS
                     if (routeResponse.Data != null)
                     {
                         await SendMethodes.handleResponse(resp, routeResponse);
+                        req.InputStream.Close();
+                        resp.Close();
+                        handleMemoryLeak(files);
                         continue;
                     }
                 }
@@ -226,6 +251,9 @@ namespace ExpressCS
                 {
                     await foundRoute.Value.Callback(parsedRequest, routeResponse);
                     await SendMethodes.handleResponse(resp, routeResponse);
+                    req.InputStream.Close();
+                    resp.Close();
+                    handleMemoryLeak(files);
                     continue;
                 }
 
@@ -233,6 +261,9 @@ namespace ExpressCS
                 if (staticFileResponse != null)
                 {
                     await SendMethodes.handleResponse(resp, staticFileResponse);
+                    req.InputStream.Close();
+                    resp.Close();
+                    handleMemoryLeak(files);
                     continue;
                 }
 
@@ -270,6 +301,19 @@ namespace ExpressCS
             }
 
             return null;
+        }
+
+        private static void handleMemoryLeak(ReceiveFileStruct[] files)
+        {
+            foreach (ReceiveFileStruct file in files)
+            {
+                file.Dispose();
+            }
+
+            Marshal.FreeHGlobal(Marshal.AllocHGlobal(1));
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect(); 
+            GC.WaitForPendingFinalizers();
         }
     }
 }
