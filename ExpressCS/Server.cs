@@ -305,7 +305,7 @@ namespace ExpressCS
 
         private static void handleMemoryLeak(ReceiveFileStruct[] files)
         {
-            foreach (ReceiveFileStruct file in files)
+            foreach (ReceiveFileStruct file in files ?? new ReceiveFileStruct[0])
             {
                 file.Dispose();
             }
