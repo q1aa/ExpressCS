@@ -50,11 +50,11 @@ namespace ExpressCS.Utils
             return dynamicParams;
         }
 
-        public static NameValueCollection? getQueryParamsFromURL(string url)
+        public static NameValueCollection getQueryParamsFromURL(string url)
         {
-            if (!url.Contains("?")) return null;
-
             NameValueCollection queryParams = new NameValueCollection();
+            if (!url.Contains("?")) return queryParams;
+
             foreach (string query in url.Split('?')[1].Split('&'))
             {
                 string[] queryParts = query.Split('=');
@@ -135,10 +135,8 @@ namespace ExpressCS.Utils
             };
         }
 
-        public static NameValueCollection? parseJSONBody(string? body)
+        public static NameValueCollection parseJSONBody(string? body)
         {
-            if (body == null) return null;
-
             NameValueCollection jsonBody = new NameValueCollection();
             try
             {
@@ -164,11 +162,11 @@ namespace ExpressCS.Utils
             return jsonBody;
         }
 
-        public static NameValueCollection? parseFormDataBody(string? body, string? boundary)
+        public static NameValueCollection parseFormDataBody(string? body, string? boundary)
         {
-            if(boundary == null || body == null) return null;
-
             NameValueCollection formData = new NameValueCollection();
+            if(boundary == null || body == null) return formData;
+
             body = body.Replace("--" + boundary + "--", "");
             string[] parts = body.Split(new string[] { "--" + boundary }, StringSplitOptions.RemoveEmptyEntries);
 
