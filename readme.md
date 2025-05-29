@@ -54,11 +54,12 @@ The usage is designed to be as similar as <a href="https://github.com/expressjs/
     dotnet run
     ```
 
-## Configuration ⚙️
+## Configuration
 <p>Use a custom port (the default one is 8080)</p>
 
 ``` cs
-ConfigStruct config = new ExpressCS.ExpressCS().CreateConfig(port: 3000);
+//The default value of the maxRequestSizeInBytes is 50mb, to disable it set it to 0, BUT this can cause issues with leaking memory!
+ConfigStruct config = new ExpressCS.ExpressCS().CreateConfig(port: 3000, maxRequestSizeInBytes: 50 * 1024 * 1024);
 //Change the startup to look like this:
 server.StartUp(config);
 ```
@@ -335,7 +336,10 @@ by the way, the test.cshtml file looks like this
 "Access is denied." -> start the application as administrator and inside the config set
 host: "*" ✅
 
-TODO: Fix the memory leaking when accessing/uploading files ❌
+HTTP status code: 413 "Request Entity Too Large" -> The default request size limit is set to 50mb, for disabling set it to 0, [take a look here](#configuration)
+but i wouldn't recommend to set it much higher then you need, since this can cause memory issues :/
+
+TODO: Fix the memory leaking when accessing/uploading files ❌ (kinna done [see](#configuration))
 
 ## Contributing 🤝
 
