@@ -8,9 +8,9 @@ namespace ExpressCS
 {
     public class ExpressCS
     {
-        public ConfigStruct CreateConfig(int port = 8080, string host = "localhost", bool ssl = false, bool showTransferedDataSize = true, bool ignoreWriteExceptions = true)
+        public ConfigStruct CreateConfig(int port = 8080, string host = "localhost", bool ssl = false, bool showTransferedDataSize = true, bool ignoreWriteExceptions = true, int maxRequestSizeInBytes = 50 * 1024 * 1024)
         {
-            return new ConfigStruct(port, host, ssl, showTransferedDataSize, ignoreWriteExceptions);
+            return new ConfigStruct(port, host, ssl, showTransferedDataSize, ignoreWriteExceptions, maxRequestSizeInBytes);
         }
 
         public Task<bool> StartUp(ConfigStruct config)
@@ -60,7 +60,7 @@ namespace ExpressCS
             }
             if(StorageUtil.WebSocketRoutes.Count > 0) Console.WriteLine("---------------------------------");
 
-            Task listenTask = Server.HandleIncomeRequests(config.ShowTransferedDataSize);
+            Task listenTask = Server.HandleIncomeRequests(config.ShowTransferedDataSize, config.MaxRequestSizeInBytes);
             if(config.ShowTransferedDataSize) SizeUpdaterUtil.StartTransferUpdateTimer();
 
             callback.Invoke();

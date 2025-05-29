@@ -22,7 +22,7 @@ namespace ExpressCS
 {
     internal class Server
     {
-        public static async Task HandleIncomeRequests(bool showTransferedDataSize)
+        public static async Task HandleIncomeRequests(bool showTransferedDataSize, int maxRequestSizeInBytes)
         {
             while (true)
             {
@@ -30,6 +30,13 @@ namespace ExpressCS
                 HttpListenerRequest req = ctx.Request;
                 HttpListenerResponse resp = ctx.Response;
                 ReceiveFileStruct[]? files = null;
+
+                if (maxRequestSizeInBytes > 0 && req.ContentLength64 > maxRequestSizeInBytes)
+                {
+                    resp.StatusCode = 413;
+                    resp.Close();
+                    continue;
+                }
 
                 string? rawBody = null;
                 string? boundary = null;
@@ -132,7 +139,7 @@ namespace ExpressCS
                     }
                     else
                     {
-                        StringBuilder sb = new StringBuilder();
+                        /*StringBuilder sb = new StringBuilder();
                         char[] buffer = ArrayPool<char>.Shared.Rent(4096);
 
                         try
@@ -152,7 +159,13 @@ namespace ExpressCS
                         }
 
                         rawBody = sb.ToString();
-                        sb.Clear();
+                        sb.Clear();*/
+
+                        using (Stream bodyStream = HelperUtil.CopyInputStream(req.InputStream))
+                        {
+                            rawBody = new StreamReader(bodyStream, req.ContentEncoding).ReadToEnd();
+                            bodyStream.Position = 0;
+                        }
                     }
 
                     RouteStruct.Request parsedRequest = new RouteStruct.Request()
@@ -162,7 +175,7 @@ namespace ExpressCS
                         Host = req.UserHostName,
                         UserAgent = req.UserAgent,
                         Body = rawBody ?? "",
-                        JSONBody = fileUpload ? new NameValueCollection() : HelperUtil.parseJSONBody(rawBody),
+                        JSONBody = new NameValueCollection(), //fileUpload ? new NameValueCollection() : HelperUtil.parseJSONBody(rawBody),
                         FormDataBody = HelperUtil.parseFormDataBody(rawBody, boundary),
                         QueryParams = HelperUtil.getQueryParamsFromURL(req.Url.PathAndQuery),
                         ContentType = req.ContentType,

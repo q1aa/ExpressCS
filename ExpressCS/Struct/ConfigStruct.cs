@@ -6,15 +6,16 @@
         public string Host { get; }
         public bool Ssl { get; }
         public bool ShowTransferedDataSize { get; set; } = true;
-
         public bool IgnoreWriteExceptions { get; set; } = true;
-        internal ConfigStruct(int port, string host, bool ssl, bool showTransferedDataSize, bool ignoreWriteExceptions)
+        public int MaxRequestSizeInBytes { get; set; }
+        internal ConfigStruct(int port, string host, bool ssl, bool showTransferedDataSize, bool ignoreWriteExceptions, int maxRequestSizeInBytes)
         {
             Port = port;
             Host = host;
             Ssl = ssl;
             ShowTransferedDataSize = showTransferedDataSize;
             IgnoreWriteExceptions = ignoreWriteExceptions;
+            MaxRequestSizeInBytes = maxRequestSizeInBytes;
         }
     }
 }
