@@ -336,6 +336,9 @@ by the way, the test.cshtml file looks like this
 "Access is denied." -> start the application as administrator and inside the config set
 host: "*" ✅
 
+"Error: Could not load file or assembly 'Microsoft.AspNetCore.WebUtilities, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'. The system cannot find the file specified."
+// uploading files isn´t working -> Please install [this package](https://www.nuget.org/packages/microsoft.aspnetcore.webutilities/)
+
 HTTP status code: 413 "Request Entity Too Large" -> The default request size limit is set to 50mb, for disabling set it to 0, [take a look here](#configuration)
 but i wouldn't recommend to set it much higher then you need, since this can cause memory issues :/
 
