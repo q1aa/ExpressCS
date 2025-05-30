@@ -183,6 +183,32 @@ server.RegisterRoute("/json", HttpMethod.GET, async (req, res) =>
 });
 ```
 
+### Receive File Upload
+```csharp
+server.RegisterRoute("/test", async (req, res) =>
+{
+    string safeDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Uploads");
+    Directory.CreateDirectory(safeDir);
+    if (!Directory.Exists(safeDir) || req.Files == null)
+    {
+        res.Send("Error");
+        return;
+    }
+    foreach (var file in req.Files)
+    {
+        string filePath = Path.Combine(safeDir, file.FileName);
+        using (FileStream fs = new FileStream(filePath, FileMode.Create))
+        {
+            await file.Data.CopyToAsync(fs);
+            Console.WriteLine($"File {file.FileName} uploaded @ {filePath}");
+        }
+        file.Dispose();
+    }
+    res.Send("Test");
+});
+```
+File got saved now by its original name inside tge "Uploads" folder, which is created inside the executable directory.
+
 ### Custom Headers
 
 Adds custom headers to the response:
