@@ -133,7 +133,6 @@ namespace ExpressCS
                             rawBody = new StreamReader(bodyStream, req.ContentEncoding).ReadToEnd();
                             bodyStream.Position = 0;
                             files = await UploadFileUtil.HandleFileUpload(req, resp, bodyStream);
-                            Console.WriteLine("File upload detected");
                         }
                         fileUpload = true;
                     }
@@ -175,7 +174,7 @@ namespace ExpressCS
                         Host = req.UserHostName,
                         UserAgent = req.UserAgent,
                         Body = rawBody ?? "",
-                        JSONBody = new NameValueCollection(), //fileUpload ? new NameValueCollection() : HelperUtil.parseJSONBody(rawBody),
+                        JSONBody = fileUpload ? new NameValueCollection() : HelperUtil.parseJSONBody(rawBody),
                         FormDataBody = HelperUtil.parseFormDataBody(rawBody, boundary),
                         QueryParams = HelperUtil.getQueryParamsFromURL(req.Url.PathAndQuery),
                         ContentType = req.ContentType,
