@@ -44,6 +44,10 @@ namespace ExpressCS
             }
 
             await HandleWebSocketConnection(webSocket, route, req, route.MessageBytes);
+            if (webSocket.State == WebSocketState.Closed || webSocket.State == WebSocketState.CloseReceived)
+            {
+                HelperUtil.CleanRequestStreams(ctx, null, true);
+            }
         }
         private static async Task HandleWebSocketConnection(WebSocket webSocket, WebSocketRouteStruct route, HttpListenerRequest req, int messageBytes)
         {

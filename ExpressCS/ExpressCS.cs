@@ -72,6 +72,7 @@ namespace ExpressCS
 
         public Task<bool> RegisterRoute(string path, Struct.HttpMethod[] method, Func<RouteStruct.Request, RouteStruct.Response, Task> callback)
         {
+            if(!path.StartsWith("/")) path = "/" + path;
             StorageUtil.Routes.Add(new RouteStruct
             {
                 Path = path.ToLower(),
@@ -120,6 +121,7 @@ namespace ExpressCS
 
         public Task<bool> RegisterWebSocket(string path, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> callback, Func<WebSocketRouteStruct.WebSocketRequest, WebSocketRouteStruct.WebSocketResponse, Task> connectionEstablished, int messageBytes = 4096)
         {
+            if (!path.StartsWith("/")) path = "/" + path;
             StorageUtil.WebSocketRoutes.Add(new WebSocketRouteStruct
             {
                 Path = path,

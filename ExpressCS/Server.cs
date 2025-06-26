@@ -295,20 +295,9 @@ namespace ExpressCS
                 }
                 finally
                 {
-                    foreach (ReceiveFileStruct file in files ?? new ReceiveFileStruct[0])
-                    {
-                        file.Dispose();
-                    }
-
                     rawBody = null;
                     boundary = null;
-
-                    ctx.Response.Close();
-                    ctx.Request.InputStream.Close();
-                    Marshal.FreeHGlobal(Marshal.AllocHGlobal(1));
-                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
+                    HelperUtil.CleanRequestStreams(ctx, files);
                 }
             }
         }

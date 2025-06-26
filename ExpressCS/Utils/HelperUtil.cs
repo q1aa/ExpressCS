@@ -1,4 +1,8 @@
-﻿using System.Collections.Specialized;
+﻿using ExpressCS.Struct;
+using System.Collections.Specialized;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Runtime;
 using System.Text.Json;
 
 namespace ExpressCS.Utils
@@ -58,6 +62,24 @@ namespace ExpressCS.Utils
         public static int getStatusCode(int setStatusCode, int preferredStatusCode)
         {
             return setStatusCode == -1 ? preferredStatusCode : setStatusCode;
+        }
+
+        public static void CleanRequestStreams(HttpListenerContext ctx, ReceiveFileStruct[]? files, bool overwriteSocketException = false)
+        {
+            foreach (ReceiveFileStruct file in files ?? new ReceiveFileStruct[0])
+            {
+                file.Dispose();
+            }
+
+            if (!ctx.Request.IsWebSocketRequest || overwriteSocketException)
+            {
+                ctx.Response.Close();
+                ctx.Request.InputStream.Close();
+            }
+            Marshal.FreeHGlobal(Marshal.AllocHGlobal(1));
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         public static string getContentType(string fileExtension)
