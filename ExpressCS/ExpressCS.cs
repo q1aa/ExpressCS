@@ -41,6 +41,7 @@ namespace ExpressCS
                 if (!staticFile.DirectoryPath.Exists)
                 {
                     LogUtil.LogWarning($"Directory {staticFile.DirectoryPath.FullName} does not exist");
+                    Directory.CreateDirectory(staticFile.DirectoryPath.FullName);
                     continue;
                 }
                 LogUtil.LogPublicDirectory(staticFile.WebPath, staticFile.DirectoryPath.FullName, staticFile.DirectoryPath.GetFiles().Length);
